@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using CrystalBoy.Core;
 
 namespace CrystalBoy.Emulation
@@ -51,12 +52,21 @@ namespace CrystalBoy.Emulation
 		bool hdmaActive;
 		byte hdmaCurrentSourceHigh, hdmaCurrentSourceLow, hdmaCurrentDestinationHigh, hdmaCurrentDestinationLow, hdmaCurrentLength;
 
+        FileStream fileWriteStream;
+        FileStream fileReadStream;
+
+        bool startSaving = false;
+
 		#endregion
 
 		#region Initialize
 
 		partial void InitializePorts()
 		{
+            string path = @"c:\temp\";
+            fileWriteStream = File.Create(path + "write.txt");
+            fileReadStream = File.Create(path + "read.txt");
+
 			this.videoStatusSnapshot = new VideoStatusSnapshot(this);
 			this.videoPortAccessList = new List<PortAccess>(1000);
 			this.paletteAccessList = new List<PaletteAccess>(1000);
@@ -171,8 +181,32 @@ namespace CrystalBoy.Emulation
 
 		public void WritePort(Port port, byte value) { WritePort((byte)port, value); }
 
+        public void triggerWrite()
+        {
+            startSaving = !startSaving;
+        }
+
+        static byte[] GetBytes(string str)
+        {
+            byte[] bytes = new byte[str.Length * sizeof(char)];
+            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
+            return bytes;
+        }
+
 		public unsafe void WritePort(byte port, byte value)
 		{
+            if (startSaving)
+            {
+                byte[] bytes = new byte[1];
+                bytes[0] = port;
+                byte[] bytesValue = new byte[1];
+                bytesValue[0] = value;
+                string portStr = "0x" + BitConverter.ToString(bytes) + " v: " + BitConverter.ToString(bytesValue) + "\r\n";
+                byte[] bytesInStream = GetBytes(portStr);
+                fileWriteStream.Read(bytesInStream, 0, bytesInStream.Length);
+                fileWriteStream.Write(bytesInStream, 0, bytesInStream.Length);
+            }
+
 			switch (port)
 			{
 				// Joypad
@@ -398,6 +432,16 @@ namespace CrystalBoy.Emulation
 		public unsafe byte ReadPort(byte port)
 		{
 			int temp;
+
+            if (startSaving)
+            {
+                byte[] bytes = new byte[1];
+                bytes[0] = port;
+                string portStr = "0x" + BitConverter.ToString(bytes) + "\r\n";
+                byte[] bytesInStream = GetBytes(portStr);
+                fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
+                fileReadStream.Write(bytesInStream, 0, bytesInStream.Length);
+            }
 
 			switch (port)
 			{

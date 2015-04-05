@@ -306,6 +306,8 @@ namespace CrystalBoy.Emulator
 				keys |= GameBoyKeys.A;
 			if (IsKeyDown(Keys.Z))
 				keys |= GameBoyKeys.B;
+            if (IsKeyDown(Keys.J))
+                bus.triggerWrite();
 			if (IsKeyDown(Keys.RShiftKey))
 				keys |= GameBoyKeys.Select;
 			if (IsKeyDown(Keys.Return))
