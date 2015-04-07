@@ -440,12 +440,15 @@ namespace CrystalBoy.Emulation
 
             if (startSaving)
             {
-                byte[] bytes = new byte[1];
-                bytes[0] = port;
-                string portStr = "0x" + BitConverter.ToString(bytes) + "\r\n";
-                byte[] bytesInStream = GetBytes(portStr);
-                fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
-                fileReadStream.Write(bytesInStream, 0, bytesInStream.Length);
+                //if (port == 0x51 || port == 0x52 || port == 0x53 || port == 0x54 || port == 0x55 || port == 0x02)
+                //{
+                    byte[] bytes = new byte[1];
+                    bytes[0] = port;
+                    string portStr = "0x" + BitConverter.ToString(bytes) + "\r\n";
+                    byte[] bytesInStream = GetBytes(portStr);
+                    fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
+                    fileReadStream.Write(bytesInStream, 0, bytesInStream.Length);
+                //}
             }
 
 			switch (port)
