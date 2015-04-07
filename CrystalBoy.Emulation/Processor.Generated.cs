@@ -96,6 +96,12 @@ namespace CrystalBoy.Emulation
 						{
 							bus.InterruptHandled(0x08);
 							pc = 0x0058;
+                            if (bus.startSaving)
+                            {
+                                    string portStr = "LINK" + "\r\n";
+                                    byte[] bytesInStream = GameBoyMemoryBus.GetBytes(portStr);
+                                    fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
+                            }
 						}
 						else if ((temp & 0x10) != 0)
 						{
@@ -113,7 +119,7 @@ namespace CrystalBoy.Emulation
 
                     if (bus.startSaving)
                     {
-                        if(opcode == 0xE0){ /* LD ($FF00+N),A  perciso de descobrir o N ...($FF00+N) no entanto é bus[pc++] e nao sei como mostrar isso */
+                        if(opcode == 0xE0){ /* LD ($FF00+N),A  perciso de descobrir o N ...($FF00+N) no entanto é bus[pc++] e nao sei como */
                             byte[] bytes = new byte[1];
                             bytes[0] = opcode;    
                             string portStr = "0x" + BitConverter.ToString(bytes) + "\r\n";
