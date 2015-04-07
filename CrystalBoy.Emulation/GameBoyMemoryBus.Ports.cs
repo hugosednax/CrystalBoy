@@ -181,9 +181,14 @@ namespace CrystalBoy.Emulation
 
 		public void WritePort(Port port, byte value) { WritePort((byte)port, value); }
 
-        public void triggerWrite()
+        public void turnOnWrite()
         {
-            startSaving = !startSaving;
+            startSaving = true;
+        }
+
+        public void turnOffWrite()
+        {
+            startSaving = false;
         }
 
         public static byte[] GetBytes(string str)
