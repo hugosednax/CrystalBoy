@@ -55,7 +55,7 @@ namespace CrystalBoy.Emulation
         FileStream fileWriteStream;
         FileStream fileReadStream;
 
-        bool startSaving = false;
+        public bool startSaving = false;
 
 		#endregion
 
@@ -63,7 +63,7 @@ namespace CrystalBoy.Emulation
 
 		partial void InitializePorts()
 		{
-            string path = @"c:\temp\";
+            string path = @"C:\Users\Toninho\Desktop\GBC\";
             fileWriteStream = File.Create(path + "write.txt");
             fileReadStream = File.Create(path + "read.txt");
 
@@ -186,7 +186,7 @@ namespace CrystalBoy.Emulation
             startSaving = !startSaving;
         }
 
-        static byte[] GetBytes(string str)
+        public static byte[] GetBytes(string str)
         {
             byte[] bytes = new byte[str.Length * sizeof(char)];
             System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);

@@ -18,6 +18,7 @@
 
 using System;
 using CrystalBoy.Core;
+using System.IO;
 
 namespace CrystalBoy.Emulation
 {
@@ -41,7 +42,15 @@ namespace CrystalBoy.Emulation
 		GameBoyMemoryBus bus;
 		ProcessorStatus status;
 
-		internal Processor(GameBoyMemoryBus bus) { this.bus = bus; }
+        
+        FileStream fileOpcodeStream;
+
+
+
+		internal Processor(GameBoyMemoryBus bus) { this.bus = bus;
+        string path = @"C:\Users\Toninho\Desktop\GBC\";
+        fileOpcodeStream = File.Create(path + "opCode.txt");
+        }
 
 		internal void Reset()
 		{

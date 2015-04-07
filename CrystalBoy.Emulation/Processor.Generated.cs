@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 namespace CrystalBoy.Emulation
 {
@@ -109,6 +110,16 @@ namespace CrystalBoy.Emulation
 
 					if (!skipPcIncrement) pc++;
 					else skipPcIncrement = false;
+
+                    if (bus.startSaving)
+                    {
+                        byte[] bytes = new byte[1];
+                        bytes[0] = opcode;
+                        string portStr = "0x" + BitConverter.ToString(bytes) + "\r\n";
+                        byte[] bytesInStream = GameBoyMemoryBus.GetBytes(portStr);
+                        fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
+                        fileOpcodeStream.Write(bytesInStream, 0, bytesInStream.Length);
+                    }
 
 					switch (opcode)
 					{
