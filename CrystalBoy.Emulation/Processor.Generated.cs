@@ -2699,6 +2699,20 @@ namespace CrystalBoy.Emulation
 							__temp8 = a;
 							bus.WritePort(bus[pc++], __temp8);
 							cycleCount = 12;
+                            if (bus[(ushort)(pc - 1)] == 0x01)
+                            {
+                                string portStrA = "Writing to SB: " + __temp8.ToString() + "\r\n";
+                                byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
+                                //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
+                                fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
+                            }
+                            if (bus[(ushort)(pc - 1)] == 0x02)
+                            {
+                                string portStrA = "Writing to SC: " + __temp8.ToString() + "\r\n";
+                                byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
+                                //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
+                                fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
+                            }
 							break;
 						case 0xE1: /* POP HL */
 							__tempHL = (ushort)(bus[sp++] | (bus[sp++] << 8));
@@ -2763,6 +2777,13 @@ namespace CrystalBoy.Emulation
 							__temp8 = bus.ReadPort(bus[pc++]);
 							a = __temp8;
 							cycleCount = 12;
+                            /*if (0x02 == bus[(ushort)(pc - 1)] || 0x01 == bus[(ushort)(pc - 1)])
+                            {*/
+                                string portStrB = "Reading " + bus[(ushort)(pc - 1)].ToString() + ".\r\n";
+                                byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
+                                //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
+                                fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
+                            //}/
 							break;
 						case 0xF1: /* POP AF */
 							__temp16 = (ushort)(bus[sp++] | (bus[sp++] << 8));

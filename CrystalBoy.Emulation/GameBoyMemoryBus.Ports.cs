@@ -63,7 +63,7 @@ namespace CrystalBoy.Emulation
 
 		partial void InitializePorts()
 		{
-            string path = @"C:\Users\Toninho\Desktop\GBC\";
+            string path = @"C:\Users\hugo__000\Desktop\";
             fileWriteStream = File.Create(path + "write.txt");
             fileReadStream = File.Create(path + "read.txt");
 
@@ -202,14 +202,14 @@ namespace CrystalBoy.Emulation
 		{
             if (startSaving)
             {
-                byte[] bytes = new byte[1];
+                /*byte[] bytes = new byte[1];
                 bytes[0] = port;
                 byte[] bytesValue = new byte[1];
                 bytesValue[0] = value;
                 string portStr = "0x" + BitConverter.ToString(bytes) + " v: " + BitConverter.ToString(bytesValue) + "\r\n";
-                byte[] bytesInStream = GetBytes(portStr);
-                fileWriteStream.Read(bytesInStream, 0, bytesInStream.Length);
-                fileWriteStream.Write(bytesInStream, 0, bytesInStream.Length);
+                byte[] bytesInStream = GetBytes(portStr);*/
+                /*fileWriteStream.Read(bytesInStream, 0, bytesInStream.Length);
+                fileWriteStream.Write(bytesInStream, 0, bytesInStream.Length);*/
             }
 
 			switch (port)
@@ -442,12 +442,12 @@ namespace CrystalBoy.Emulation
             {
                 //if (port == 0x51 || port == 0x52 || port == 0x53 || port == 0x54 || port == 0x55 || port == 0x02)
                 //{
-                    byte[] bytes = new byte[1];
+                    /*byte[] bytes = new byte[1];
                     bytes[0] = port;
                     string portStr = "0x" + BitConverter.ToString(bytes) + "\r\n";
-                    byte[] bytesInStream = GetBytes(portStr);
-                    fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
-                    fileReadStream.Write(bytesInStream, 0, bytesInStream.Length);
+                    byte[] bytesInStream = GetBytes(portStr);*/
+                    /*fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
+                    fileReadStream.Write(bytesInStream, 0, bytesInStream.Length);*/
                 //}
             }
 
@@ -455,6 +455,24 @@ namespace CrystalBoy.Emulation
 			{
 				case 0x00:
 					return ReadJoypadRegister();
+                case 0x01:
+                    byte serialByte = portMemory[0x01];
+                     byte[] bytes = new byte[1];
+                     bytes[0] = serialByte;
+                    string portStr = "Content: SB" + BitConverter.ToString(bytes) + "\r\n";
+                    byte[] bytesInStream = GetBytes(portStr);
+                    //fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
+                    fileReadStream.Write(bytesInStream, 0, bytesInStream.Length);
+                    return serialByte;
+                case 0x02:
+                    byte serialByteB = portMemory[0x02];
+                    byte[] bytesB = new byte[1];
+                    bytesB[0] = serialByteB;
+                    string portStrB = "Content SC: " + BitConverter.ToString(bytesB) + "\r\n";
+                    byte[] bytesInStreamB = GetBytes(portStrB);
+                    //fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
+                    fileReadStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
+                    return serialByteB;
 				case 0x04: // DIV
 					return GetDividerValue();
 				case 0x05: // TIMA
