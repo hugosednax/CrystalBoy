@@ -57,6 +57,9 @@ namespace CrystalBoy.Emulation
 
         public bool startSaving = false;
 
+        Link link;
+        bool transfer = false;
+
 		#endregion
 
 		#region Initialize
@@ -82,6 +85,16 @@ namespace CrystalBoy.Emulation
 			this.savedPaletteAccessList = paletteAccessList;
 #endif
 		}
+
+        public void InitializeLink(Link link)
+        {
+            this.link = link;
+        }
+
+        public void InitializeTransfer()
+        {
+            this.transfer = true;
+        }
 
 		#endregion
 
@@ -218,6 +231,26 @@ namespace CrystalBoy.Emulation
 				case 0x00: // JOYP
 					WriteJoypadRegister(value);
 					break;
+                case 0x01:
+                    portMemory[0x01] = value;
+                    if(transfer) link.send(value);
+                    byte[] bytesA = new byte[1];
+                    bytesA[0] = value;
+                    string portStr = "Wrote Content: SB" + BitConverter.ToString(bytesA) + "\r\n";
+                    byte[] bytesInStream = GameBoyMemoryBus.GetBytes(portStr);
+                    //fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
+                    fileReadStream.Write(bytesInStream, 0, bytesInStream.Length);
+                    break;
+                case 0x02:
+                    portMemory[0x02] = value;
+                    byte[] bytesB = new byte[1];
+                    bytesB[0] = value;
+                    string portStrB = "Wrote Content SC: " + BitConverter.ToString(bytesB) + "\r\n";
+                    byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
+                    //fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
+                    fileReadStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
+                    break;
+				
 				// Timer Ports
 				case 0x04: // DIV
 					ResetDivider();

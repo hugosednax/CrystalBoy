@@ -306,6 +306,8 @@ namespace CrystalBoy.Emulator
 				keys |= GameBoyKeys.A;
 			if (IsKeyDown(Keys.Z))
 				keys |= GameBoyKeys.B;
+            if (IsKeyDown(Keys.O))
+                bus.RequestedInterrupts |= 0x08;
             if (IsKeyDown(Keys.J))
                 bus.turnOnWrite();
             if (IsKeyDown(Keys.K))

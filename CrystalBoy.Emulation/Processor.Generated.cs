@@ -124,7 +124,7 @@ namespace CrystalBoy.Emulation
                             bytes[0] = opcode;    
                             string portStr = "0x" + BitConverter.ToString(bytes) + "\r\n";
                             byte[] bytesInStream = GameBoyMemoryBus.GetBytes(portStr);
-                            fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
+                            //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
                             fileOpcodeStream.Write(bytesInStream, 0, bytesInStream.Length);
                         }
                     }
@@ -2777,13 +2777,13 @@ namespace CrystalBoy.Emulation
 							__temp8 = bus.ReadPort(bus[pc++]);
 							a = __temp8;
 							cycleCount = 12;
-                            /*if (0x02 == bus[(ushort)(pc - 1)] || 0x01 == bus[(ushort)(pc - 1)])
-                            {*/
+                            if (0x02 == bus[(ushort)(pc - 1)] || 0x01 == bus[(ushort)(pc - 1)])
+                            {
                                 string portStrB = "Reading " + bus[(ushort)(pc - 1)].ToString() + ".\r\n";
                                 byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
                                 //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
                                 fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
-                            //}/
+                           }
 							break;
 						case 0xF1: /* POP AF */
 							__temp16 = (ushort)(bus[sp++] | (bus[sp++] << 8));
