@@ -14,12 +14,9 @@ namespace CrystalBoy.Emulation
         {
             this.bus = bus;
         }
-        public void send(Byte sendByte)
+        public void Send(Byte sendByte)
         {
             bus.WritePort(0x01, sendByte);
-        }
-        public void interrupt()
-        {
             bus.RequestedInterrupts |= 0x08;
         }
     }

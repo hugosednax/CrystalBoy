@@ -135,7 +135,7 @@ namespace CrystalBoy.Emulation
 		partial void InitializeVideo();
 		partial void InitializeSuperGameBoy();
 		partial void InitializeJoypad();
-		partial void InitializePorts();
+		partial void InitializePorts(GameBoyMemoryBus bus);
 		partial void InitializeRendering();
 		partial void InitializeDebug();
 		partial void InitializeSnapshot();
@@ -159,7 +159,7 @@ namespace CrystalBoy.Emulation
 			InitializeVideo();
 			InitializeSuperGameBoy();
 			InitializeJoypad();
-			InitializePorts();
+			InitializePorts(this);
 			InitializeRendering();
 			InitializeDebug();
 			InitializeSnapshot();

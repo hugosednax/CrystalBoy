@@ -20,6 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using CrystalBoy.Core;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Tcp;
 
 namespace CrystalBoy.Emulation
 {
@@ -59,16 +62,24 @@ namespace CrystalBoy.Emulation
 
         Link link;
         bool transfer = false;
+        byte sendData = new byte();
+        public string otherLinkUrl = "localhost";
+        public int otherLinkPort = 8086;
 
 		#endregion
 
 		#region Initialize
 
-		partial void InitializePorts()
+		partial void InitializePorts(GameBoyMemoryBus bus)
 		{
             string path = @"C:\Users\hugo__000\Desktop\";
             fileWriteStream = File.Create(path + "write.txt");
             fileReadStream = File.Create(path + "read.txt");
+
+            this.link = new Link(bus);
+            TcpChannel channel = new TcpChannel(8086);
+            ChannelServices.RegisterChannel(channel, false);
+            RemotingServices.Marshal(link, "L", typeof(Link));
 
 			this.videoStatusSnapshot = new VideoStatusSnapshot(this);
 			this.videoPortAccessList = new List<PortAccess>(1000);
@@ -86,14 +97,13 @@ namespace CrystalBoy.Emulation
 #endif
 		}
 
-        public void InitializeLink(Link link)
-        {
-            this.link = link;
-        }
-
         public void InitializeTransfer()
         {
             this.transfer = true;
+        }
+
+        public Link Link() {
+            return link;
         }
 
 		#endregion
@@ -233,22 +243,22 @@ namespace CrystalBoy.Emulation
 					break;
                 case 0x01:
                     portMemory[0x01] = value;
-                    if(transfer) link.send(value);
+                    if(transfer) link.Send(value);
                     byte[] bytesA = new byte[1];
                     bytesA[0] = value;
-                    string portStr = "Wrote Content: SB" + BitConverter.ToString(bytesA) + "\r\n";
+                    /*string portStr = "Wrote Content: SB" + BitConverter.ToString(bytesA) + "\r\n";
                     byte[] bytesInStream = GameBoyMemoryBus.GetBytes(portStr);
                     //fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
-                    fileReadStream.Write(bytesInStream, 0, bytesInStream.Length);
+                    fileReadStream.Write(bytesInStream, 0, bytesInStream.Length);*/
                     break;
                 case 0x02:
                     portMemory[0x02] = value;
                     byte[] bytesB = new byte[1];
                     bytesB[0] = value;
-                    string portStrB = "Wrote Content SC: " + BitConverter.ToString(bytesB) + "\r\n";
+                    /*string portStrB = "Wrote Content SC: " + BitConverter.ToString(bytesB) + "\r\n";
                     byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
                     //fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
-                    fileReadStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
+                    fileReadStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
                     break;
 				
 				// Timer Ports
@@ -492,19 +502,19 @@ namespace CrystalBoy.Emulation
                     byte serialByte = portMemory[0x01];
                      byte[] bytes = new byte[1];
                      bytes[0] = serialByte;
-                    string portStr = "Content: SB" + BitConverter.ToString(bytes) + "\r\n";
+                    /*string portStr = "Content: SB" + BitConverter.ToString(bytes) + "\r\n";
                     byte[] bytesInStream = GetBytes(portStr);
                     //fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
-                    fileReadStream.Write(bytesInStream, 0, bytesInStream.Length);
+                    fileReadStream.Write(bytesInStream, 0, bytesInStream.Length);*/
                     return serialByte;
                 case 0x02:
                     byte serialByteB = portMemory[0x02];
                     byte[] bytesB = new byte[1];
                     bytesB[0] = serialByteB;
-                    string portStrB = "Content SC: " + BitConverter.ToString(bytesB) + "\r\n";
+                    /*string portStrB = "Content SC: " + BitConverter.ToString(bytesB) + "\r\n";
                     byte[] bytesInStreamB = GetBytes(portStrB);
                     //fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
-                    fileReadStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
+                    fileReadStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
                     return serialByteB;
 				case 0x04: // DIV
 					return GetDividerValue();

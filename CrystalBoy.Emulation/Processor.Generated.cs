@@ -35,6 +35,7 @@ namespace CrystalBoy.Emulation
 {
 	partial class Processor
 	{
+
 		internal bool Emulate(bool finishFrame)
 		{
 			// Register variables, cloned here for efficiency (maybe it's an error, but it is easy to remove if needed)
@@ -2701,17 +2702,29 @@ namespace CrystalBoy.Emulation
 							cycleCount = 12;
                             if (bus[(ushort)(pc - 1)] == 0x01)
                             {
-                                string portStrA = "Writing to SB: " + __temp8.ToString() + "\r\n";
+                                /*string portStrA = "Writing to SB: " + __temp8.ToString() + "\r\n";
                                 byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
                                 //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                                fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
+                                fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);*/
                             }
                             if (bus[(ushort)(pc - 1)] == 0x02)
                             {
-                                string portStrA = "Writing to SC: " + __temp8.ToString() + "\r\n";
+                                if ((__temp8 & (1 << 0)) != 0) //start transfer flag is true
+                                {
+                                    Link otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.102.132.160:8086/L");
+                                    try{
+                                        otherLink.Send(bus.ReadPort(0x01)/*content of sc*/);
+                                        string portStrA = "Trying to write to link... \r\n";
+                                        byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
+                                        //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
+                                        fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
+                                    }catch(Exception ex){
+                                    }
+                                }
+                                /*string portStrA = "Writing to SC: " + __temp8.ToString() + "\r\n";
                                 byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
                                 //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                                fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
+                                fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);*/
                             }
 							break;
 						case 0xE1: /* POP HL */
@@ -2779,10 +2792,10 @@ namespace CrystalBoy.Emulation
 							cycleCount = 12;
                             if (0x02 == bus[(ushort)(pc - 1)] || 0x01 == bus[(ushort)(pc - 1)])
                             {
-                                string portStrB = "Reading " + bus[(ushort)(pc - 1)].ToString() + ".\r\n";
+                                /*string portStrB = "Reading " + bus[(ushort)(pc - 1)].ToString() + ".\r\n";
                                 byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
                                 //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                                fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
+                                fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
                            }
 							break;
 						case 0xF1: /* POP AF */
