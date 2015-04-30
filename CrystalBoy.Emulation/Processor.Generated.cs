@@ -2717,6 +2717,7 @@ namespace CrystalBoy.Emulation
                             {
                                 if ((__temp8 & (1 << 0)) != 0) //start transfer flag is true
                                 {
+                                    bus.RequestedInterrupts |= 0x08;
                                     string portStrA = "Trying to write to link... \r\n";
                                     byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
                                     //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
