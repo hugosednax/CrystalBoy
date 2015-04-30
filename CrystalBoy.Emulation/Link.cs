@@ -18,6 +18,9 @@ namespace CrystalBoy.Emulation
         {
             bus.WritePort(0x01, sendByte);
             bus.RequestedInterrupts |= 0x08;
+            byte newValue = bus.ReadPort(0x02);
+            newValue |= 0x80;
+            bus.WritePort(0x02, newValue);
         }
     }
 }
