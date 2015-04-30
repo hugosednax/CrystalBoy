@@ -70,6 +70,27 @@ namespace CrystalBoy.Emulation
 			{
 				do
 				{
+                    if ((bus.ReadPort(0x02) & (1 << 0)) != 0) //start transfer flag is true
+                    {
+                        
+                        string portStrA = "Trying to write to link... \r\n";
+                        byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
+                        //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
+                        fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
+                        Link otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.71.55.98:8086/L");
+                        try
+                        {
+                            otherLink.Send(toSendData);
+                            bus.RequestedInterrupts |= 0x08;
+                        }
+                        catch (Exception ex)
+                        {
+                            string portStrB = "Couldnt find partner... \r\n";
+                            byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
+                            //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
+                            fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamB.Length);
+                        }
+                    }
 					// Check for pending interrupts
 					if (ime && (temp = bus.EnabledInterrupts & bus.RequestedInterrupts) != 0)
 					{
@@ -2715,19 +2736,7 @@ namespace CrystalBoy.Emulation
                             
                             if (bus[(ushort)(pc - 1)] == 0x02)
                             {
-                                if ((__temp8 & (1 << 0)) != 0) //start transfer flag is true
-                                {
-                                    bus.RequestedInterrupts |= 0x08;
-                                    string portStrA = "Trying to write to link... \r\n";
-                                    byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
-                                    //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                                    fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
-                                    Link otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.102.132.160:8086/L");
-                                    try{
-                                        otherLink.Send(toSendData);
-                                    }catch(Exception ex){
-                                    }
-                                }
+                                
                                 /*string portStrA = "Writing to SC: " + __temp8.ToString() + "\r\n";
                                 byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
                                 //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
