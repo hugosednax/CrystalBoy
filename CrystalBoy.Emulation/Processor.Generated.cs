@@ -2717,13 +2717,13 @@ namespace CrystalBoy.Emulation
                             {
                                 if ((__temp8 & (1 << 0)) != 0) //start transfer flag is true
                                 {
+                                    string portStrA = "Trying to write to link... \r\n";
+                                    byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
+                                    //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
+                                    fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
                                     Link otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.102.132.160:8086/L");
                                     try{
                                         otherLink.Send(toSendData);
-                                        string portStrA = "Trying to write to link... \r\n";
-                                        byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
-                                        //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                                        fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
                                     }catch(Exception ex){
                                     }
                                 }
