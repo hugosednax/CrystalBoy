@@ -88,7 +88,7 @@ namespace CrystalBoy.Emulation
                             string portStrB = "Couldnt find partner... \r\n";
                             byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
                             //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                            fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamB.Length);
+                            fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
                         }
                     }
 					// Check for pending interrupts
