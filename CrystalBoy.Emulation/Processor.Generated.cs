@@ -39,6 +39,14 @@ namespace CrystalBoy.Emulation
 
 		internal bool Emulate(bool finishFrame)
 		{
+            Link otherLink;
+            try
+            {
+                otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.71.55.98:8086/L");
+            }
+            catch (Exception) {
+                otherLink = null;
+            }
 			// Register variables, cloned here for efficiency (maybe it's an error, but it is easy to remove if needed)
 			byte a, f, b, c, d, e, h, l, opcode;
 			ushort sp, pc;
@@ -70,25 +78,30 @@ namespace CrystalBoy.Emulation
 			{
 				do
 				{
-                    if ((bus.ReadPort(0x02) & (1 << 0)) != 0) //start transfer flag is true
+                    if ((bus.ReadPort(0x02) & (1 << 7)) != 0) //start transfer flag is true
                     {
                         
                         string portStrA = "Trying to write to link... \r\n";
                         byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
                         //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
                         fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
-                        Link otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.71.55.98:8086/L");
-                        try
+                        if (otherLink != null)
                         {
-                            otherLink.Send(toSendData);
-                            bus.RequestedInterrupts |= 0x08;
-                        }
-                        catch (Exception ex)
-                        {
-                            string portStrB = "Couldnt find partner... \r\n";
-                            byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
-                            //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                            fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
+                            try
+                            {
+                                otherLink.Send(toSendData);
+                                byte newValue = bus.ReadPort(0x02);
+                                newValue &= 0x7F; //7F = 0111 1111
+                                bus.WritePort(0x02, newValue);
+                                //bus.RequestedInterrupts |= 0x08;
+                            }
+                            catch (Exception ex)
+                            {
+                                string portStrB = "Couldnt find partner... \r\n";
+                                byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
+                                //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
+                                fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
+                            }
                         }
                     }
 					// Check for pending interrupts
