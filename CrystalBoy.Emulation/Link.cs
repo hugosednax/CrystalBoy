@@ -108,6 +108,9 @@ namespace CrystalBoy.Emulation
             }
         }
 
-
+        public bool ping()
+        {
+            return true;
+        }
     }
 }
