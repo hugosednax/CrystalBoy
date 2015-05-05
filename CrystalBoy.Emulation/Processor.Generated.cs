@@ -42,7 +42,8 @@ namespace CrystalBoy.Emulation
             Link otherLink;
             try
             {
-                otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.71.55.98:8086/L");
+                otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.102.132.160:8086/L");
+                // mine 25.64.78.168
             }
             catch (Exception) {
                 otherLink = null;

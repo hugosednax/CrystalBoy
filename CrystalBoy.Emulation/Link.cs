@@ -10,8 +10,9 @@ namespace CrystalBoy.Emulation
     public class Link : MarshalByRefObject
     {
         GameBoyMemoryBus bus;
-        string path = @"C:\Users\hugo__000\Desktop\";
+        string path = @"C:\Users\Filipe Teixeira\Desktop\";
         FileStream fileOpcodeStream;
+
 
         public Link(GameBoyMemoryBus bus)
         {

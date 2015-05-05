@@ -60,6 +60,7 @@ namespace CrystalBoy.Emulation
 
         public bool startSaving = false;
 
+        public delegate void RemoteAsyncDelegate(byte b);
         Link link;
         bool transfer = false;
         byte sendData = new byte();
@@ -72,7 +73,7 @@ namespace CrystalBoy.Emulation
 
 		partial void InitializePorts(GameBoyMemoryBus bus)
 		{
-            string path = @"C:\Users\hugo__000\Desktop\";
+            string path = @"C:\Users\Filipe Teixeira\Desktop\";
             fileWriteStream = File.Create(path + "write.txt");
             fileReadStream = File.Create(path + "read.txt");
 
@@ -243,7 +244,11 @@ namespace CrystalBoy.Emulation
 					break;
                 case 0x01:
                     portMemory[0x01] = value;
-                    if(transfer) link.Send(value);
+                    if (transfer)
+                    {
+                        RemoteAsyncDelegate del = new RemoteAsyncDelegate(link.Send);
+                        del(value);
+                    }
                     byte[] bytesA = new byte[1];
                     bytesA[0] = value;
                     /*string portStr = "Wrote Content: SB" + BitConverter.ToString(bytesA) + "\r\n";
