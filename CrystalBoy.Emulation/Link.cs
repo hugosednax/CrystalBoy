@@ -12,7 +12,7 @@ namespace CrystalBoy.Emulation
     public class Link : MarshalByRefObject
     {
         GameBoyMemoryBus bus;
-        string path = @"..\output\";
+        string path = @"..\..\..\output\";
         FileStream fileOpcodeStream;
         string ip = "120.120.120.120"; // hardcoded IP
         Socket serverSocket, clientSocket;
