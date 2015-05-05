@@ -36,7 +36,7 @@ namespace CrystalBoy.Emulation
 	partial class Processor
 	{
         byte toSendData = new byte();
-        Link link = new Link();
+        Link2 link = new Link2();
 
 		internal bool Emulate(bool finishFrame)
 		{
