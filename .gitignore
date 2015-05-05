@@ -241,4 +241,3 @@ FakesAssemblies/
 *.opt
 
 # Output folder
-/output/*
