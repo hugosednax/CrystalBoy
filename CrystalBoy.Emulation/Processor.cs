@@ -48,11 +48,7 @@ namespace CrystalBoy.Emulation
 
 
 		internal Processor(GameBoyMemoryBus bus) { this.bus = bus;
-<<<<<<< HEAD
         string path = @"..\output\";
-=======
-        string path = @"C:\Users\hugo__000\Desktop\";
->>>>>>> origin/master
         fileOpcodeStream = File.Create(path + "opCode.txt");
         }
 

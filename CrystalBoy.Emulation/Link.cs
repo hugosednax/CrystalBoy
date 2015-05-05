@@ -85,6 +85,7 @@ namespace CrystalBoy.Emulation
                 clientSocket.EndReceive(ar);
 
                 byte received = byteDataReceive[0];
+
                 bus.WritePort(0x01, received);
                 //TODO write received byte to bus
 
@@ -101,6 +102,7 @@ namespace CrystalBoy.Emulation
             try
             {
                 clientSocket.EndSend(ar);
+
             }
             catch (Exception ex)
             {
