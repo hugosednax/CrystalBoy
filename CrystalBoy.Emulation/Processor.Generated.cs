@@ -36,19 +36,10 @@ namespace CrystalBoy.Emulation
 	partial class Processor
 	{
         byte toSendData = new byte();
-        Object myLock;
-        public delegate void LinkAsyncDelegate(byte newByte);
+        Link link = new Link();
 
 		internal bool Emulate(bool finishFrame)
 		{
-            Link otherLink;
-            try
-            {
-                otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.64.78.168:8086/L");
-            }
-            catch (Exception) {
-                otherLink = null;
-            }
 			// Register variables, cloned here for efficiency (maybe it's an error, but it is easy to remove if needed)
 			byte a, f, b, c, d, e, h, l, opcode;
 			ushort sp, pc;
@@ -81,50 +72,29 @@ namespace CrystalBoy.Emulation
 				do
 				{
                     if (bus.checkLink()) {
-                            bus.WritePort(0x01, bus.linkByte());
-                            byte newValue = bus.ReadPort(0x02);
-                            /*newValue &= 0x7F; //7F = 0111 1111
-                            bus.WritePort(0x02, newValue);*/
-                            bus.RequestedInterrupts |= 0x08;
-                            bus.deactivateLink();
-                            /*string portStrB = "Remote call! \r\n";
-                            byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
-                            //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                            fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
+                        //bus.WritePort(0x01, bus.linkByte());
+                        //byte newValue = bus.ReadPort(0x02);
+                        /*newValue &= 0x7F; //7F = 0111 1111
+                        bus.WritePort(0x02, newValue);*/
+                        //bus.RequestedInterrupts |= 0x08;
+                        //bus.deactivateLink();
+                        /*string portStrB = "Remote call! \r\n";
+                        byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
+                        //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
+                        fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
                     }
 
                     else if ((bus.ReadPort(0x02) & (1 << 7)) != 0) //start transfer flag is true
                     {
                         
-                        string portStrA = "SC: " + bus.ReadPort(0x02).ToString() + " \r\n";
-                        byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
+                        //string portStrA = "SC: " + bus.ReadPort(0x02).ToString() + " \r\n";
+                        //byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
                         //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                        fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
-                        if (otherLink != null)
-                        {
-                            /*bool failed = false;
-                            try
-                            {
-                                otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.64.78.168:8086/L");
-                                otherLink.ping();
-                            }catch (Exception ex)
-                            {
-                                failed = true;
-                                string portStrB = "Couldnt find partner... \r\n";
-                                byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
-                                //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                                fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
-                            }
-                            if(!failed){*/
-                            otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.64.78.168:8086/L");
-                                LinkAsyncDelegate RemoteDel = new LinkAsyncDelegate(otherLink.Send);
-                                RemoteDel.BeginInvoke(toSendData, null, null);
-                                byte newValue = bus.ReadPort(0x02);
-                                newValue &= 0x7F; //7F = 0111 1111
-                                bus.WritePort(0x02, newValue);
-                                //bus.RequestedInterrupts |= 0x08;
-                            //}
-                        }
+                        //fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
+                        /*
+                        byte newValue = bus.ReadPort(0x02);
+                        newValue &= 0x7F; //7F = 0111 1111
+                        bus.WritePort(0x02, newValue);*/
                     }
 					// Check for pending interrupts
 					if (ime && (temp = bus.EnabledInterrupts & bus.RequestedInterrupts) != 0)
