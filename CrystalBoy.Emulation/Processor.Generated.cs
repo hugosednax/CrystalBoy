@@ -37,18 +37,14 @@ namespace CrystalBoy.Emulation
 	{
         byte toSendData = new byte();
         Object myLock;
+        public delegate void LinkAsyncDelegate(byte newByte);
 
 		internal bool Emulate(bool finishFrame)
 		{
             Link otherLink;
             try
             {
-<<<<<<< Updated upstream
-                otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.102.132.160:8086/L");
-                // mine 25.64.78.168
-=======
                 otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.64.78.168:8086/L");
->>>>>>> Stashed changes
             }
             catch (Exception) {
                 otherLink = null;
@@ -106,21 +102,28 @@ namespace CrystalBoy.Emulation
                         fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
                         if (otherLink != null)
                         {
+                            /*bool failed = false;
                             try
                             {
-                                otherLink.Send(toSendData);
-                                byte newValue = bus.ReadPort(0x02);
-                                newValue &= 0x7F; //7F = 0111 1111
-                                bus.WritePort(0x02, newValue);
-                                //bus.RequestedInterrupts |= 0x08;
-                            }
-                            catch (Exception ex)
+                                otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.64.78.168:8086/L");
+                                otherLink.ping();
+                            }catch (Exception ex)
                             {
+                                failed = true;
                                 string portStrB = "Couldnt find partner... \r\n";
                                 byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
                                 //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
                                 fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
                             }
+                            if(!failed){*/
+                            otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.64.78.168:8086/L");
+                                LinkAsyncDelegate RemoteDel = new LinkAsyncDelegate(otherLink.Send);
+                                RemoteDel.BeginInvoke(toSendData, null, null);
+                                byte newValue = bus.ReadPort(0x02);
+                                newValue &= 0x7F; //7F = 0111 1111
+                                bus.WritePort(0x02, newValue);
+                                //bus.RequestedInterrupts |= 0x08;
+                            //}
                         }
                     }
 					// Check for pending interrupts

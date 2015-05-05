@@ -10,7 +10,7 @@ namespace CrystalBoy.Emulation
     public class Link : MarshalByRefObject
     {
         GameBoyMemoryBus bus;
-        string path = @"C:\Users\Filipe Teixeira\Desktop\";
+        string path = @"C:\Users\hugo__000\Desktop\";
         FileStream fileOpcodeStream;
 
 
@@ -22,6 +22,11 @@ namespace CrystalBoy.Emulation
         public async void Send(Byte sendByte)
         {
             bus.activateLink(sendByte);
+        }
+
+        public bool ping()
+        {
+            return true;
         }
     }
 }

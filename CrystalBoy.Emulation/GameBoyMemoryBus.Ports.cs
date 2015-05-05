@@ -62,13 +62,12 @@ namespace CrystalBoy.Emulation
 
         public bool startSaving = false;
 
-        public delegate void RemoteAsyncDelegate(byte b);
+        //public delegate void RemoteAsyncDelegate(byte b);
         Link link;
         bool transfer = false;
         byte sendData = new byte();
         public string otherLinkUrl = "localhost";
         public int otherLinkPort = 8086;
-        public Object myLock;
 
 		#endregion
 
@@ -76,7 +75,7 @@ namespace CrystalBoy.Emulation
 
 		partial void InitializePorts(GameBoyMemoryBus bus)
 		{
-            string path = @"C:\Users\Filipe Teixeira\Desktop\";
+            string path = @"C:\Users\hugo__000\Desktop\";
             fileWriteStream = File.Create(path + "write.txt");
             fileReadStream = File.Create(path + "read.txt");
 
@@ -264,23 +263,18 @@ namespace CrystalBoy.Emulation
 					break;
                 case 0x01:
                     portMemory[0x01] = value;
-                    if (transfer)
-                    {
-                        RemoteAsyncDelegate del = new RemoteAsyncDelegate(link.Send);
-                        del(value);
-                    }
-                    byte[] bytesA = new byte[1];
+                    /*byte[] bytesA = new byte[1];
                     bytesA[0] = value;
-                    /*string portStr = "Wrote Content: SB" + BitConverter.ToString(bytesA) + "\r\n";
+                    string portStr = "Wrote Content: SB" + BitConverter.ToString(bytesA) + "\r\n";
                     byte[] bytesInStream = GameBoyMemoryBus.GetBytes(portStr);
                     //fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
                     fileReadStream.Write(bytesInStream, 0, bytesInStream.Length);*/
                     break;
                 case 0x02:
                     portMemory[0x02] = value;
-                    byte[] bytesB = new byte[1];
+                    /*byte[] bytesB = new byte[1];
                     bytesB[0] = value;
-                    /*string portStrB = "Wrote Content SC: " + BitConverter.ToString(bytesB) + "\r\n";
+                    string portStrB = "Wrote Content SC: " + BitConverter.ToString(bytesB) + "\r\n";
                     byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
                     //fileReadStream.Read(bytesInStream, 0, bytesInStream.Length);
                     fileReadStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
