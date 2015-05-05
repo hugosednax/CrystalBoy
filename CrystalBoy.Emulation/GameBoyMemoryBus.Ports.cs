@@ -76,7 +76,7 @@ namespace CrystalBoy.Emulation
 
 		partial void InitializePorts(GameBoyMemoryBus bus)
 		{
-            string path = @"C:\Users\Filipe Teixeira\Desktop\";
+            string path = @"..\output\";
             fileWriteStream = File.Create(path + "write.txt");
             fileReadStream = File.Create(path + "read.txt");
 
