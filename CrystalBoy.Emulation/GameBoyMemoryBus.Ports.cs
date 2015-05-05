@@ -49,6 +49,8 @@ namespace CrystalBoy.Emulation
 		int bgpIndex, obpIndex;
 		bool bgpInc, obpInc;
 		bool usePaletteMapping;
+        byte toWrite;
+        bool linkFlag = false;
 
 		byte hdmaSourceHigh, hdmaSourceLow, hdmaDestinationHigh, hdmaDestinationLow;
 		// For Horizontal Blank DMA
@@ -66,6 +68,7 @@ namespace CrystalBoy.Emulation
         byte sendData = new byte();
         public string otherLinkUrl = "localhost";
         public int otherLinkPort = 8086;
+        public Object myLock;
 
 		#endregion
 
@@ -220,6 +223,23 @@ namespace CrystalBoy.Emulation
             byte[] bytes = new byte[str.Length * sizeof(char)];
             System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
             return bytes;
+        }
+
+        public bool checkLink() {
+            return linkFlag;
+        }
+
+        public void activateLink(byte k) {
+                this.toWrite = k;
+                this.linkFlag = true;
+        }
+
+        public void deactivateLink() {
+            linkFlag = false;
+        }
+
+        public byte linkByte() {
+                return toWrite;
         }
 
 		public unsafe void WritePort(byte port, byte value)

@@ -36,14 +36,19 @@ namespace CrystalBoy.Emulation
 	partial class Processor
 	{
         byte toSendData = new byte();
+        Object myLock;
 
 		internal bool Emulate(bool finishFrame)
 		{
             Link otherLink;
             try
             {
+<<<<<<< Updated upstream
                 otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.102.132.160:8086/L");
                 // mine 25.64.78.168
+=======
+                otherLink = (Link)Activator.GetObject(typeof(Link), "tcp://25.64.78.168:8086/L");
+>>>>>>> Stashed changes
             }
             catch (Exception) {
                 otherLink = null;
@@ -79,10 +84,23 @@ namespace CrystalBoy.Emulation
 			{
 				do
 				{
-                    if ((bus.ReadPort(0x02) & (1 << 7)) != 0) //start transfer flag is true
+                    if (bus.checkLink()) {
+                            bus.WritePort(0x01, bus.linkByte());
+                            byte newValue = bus.ReadPort(0x02);
+                            /*newValue &= 0x7F; //7F = 0111 1111
+                            bus.WritePort(0x02, newValue);*/
+                            bus.RequestedInterrupts |= 0x08;
+                            bus.deactivateLink();
+                            /*string portStrB = "Remote call! \r\n";
+                            byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
+                            //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
+                            fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
+                    }
+
+                    else if ((bus.ReadPort(0x02) & (1 << 7)) != 0) //start transfer flag is true
                     {
                         
-                        string portStrA = "Trying to write to link... \r\n";
+                        string portStrA = "SC: " + bus.ReadPort(0x02).ToString() + " \r\n";
                         byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
                         //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
                         fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
@@ -133,12 +151,6 @@ namespace CrystalBoy.Emulation
 						{
 							bus.InterruptHandled(0x08);
 							pc = 0x0058;
-                            if (bus.startSaving)
-                            {
-                                    string portStr = "LINK" + "\r\n";
-                                    byte[] bytesInStream = GameBoyMemoryBus.GetBytes(portStr);
-                                    fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                            }
 						}
 						else if ((temp & 0x10) != 0)
 						{
@@ -159,10 +171,10 @@ namespace CrystalBoy.Emulation
                         if(opcode == 0xE0){ /* LD ($FF00+N),A  perciso de descobrir o N ...($FF00+N) no entanto é bus[pc++] e nao sei como */
                             byte[] bytes = new byte[1];
                             bytes[0] = opcode;    
-                            string portStr = "0x" + BitConverter.ToString(bytes) + "\r\n";
+                            /*string portStr = "0x" + BitConverter.ToString(bytes) + "\r\n";
                             byte[] bytesInStream = GameBoyMemoryBus.GetBytes(portStr);
                             //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                            fileOpcodeStream.Write(bytesInStream, 0, bytesInStream.Length);
+                            fileOpcodeStream.Write(bytesInStream, 0, bytesInStream.Length);*/
                         }
                     }
 
