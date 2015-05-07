@@ -11,6 +11,8 @@ namespace CrystalBoy.Emulation
 {
     public class Link : MarshalByRefObject
     {
+        private static const int PORT = 10001;
+
         GameBoyMemoryBus bus;
         string path = @"..\..\..\output\";
         FileStream fileOpcodeStream;
@@ -34,79 +36,69 @@ namespace CrystalBoy.Emulation
             serverSocketActivation();
         }
 
-        public void Send(Byte sendByte)
+        public void Send(Byte data)
         {
-            bus.activateLink(sendByte);
-            try
-            {
-                byteDataSend[0] = sendByte;
-
-                //Send it to the server
-                clientSocket.BeginSend(byteDataSend, 0, byteDataSend.Length,
-                    SocketFlags.None,
-                    new AsyncCallback(OnSend), null);
-            }
-            catch (Exception)
-            {
-                //TODO message
-            }  
+            sendByte(data);
         }
 
-        private void serverSocketActivation()
+        async Task serverSocketActivation()
         {
+            bool done = false;
+            UdpClient listener = new UdpClient(PORT);
+            IPEndPoint groupEP = new IPEndPoint(IPAddress.Any, PORT);
+            string received_data;
+            byte[] receive_byte_array;
             try
             {
-                //We are using TCP sockets
-                serverSocket = new Socket(AddressFamily.InterNetwork,
-                                          SocketType.Stream,
-                                          ProtocolType.Tcp);
-
-                //Assign the any IP of the machine and listen on port number 1000
-                IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 10001);
-
-                //Bind and listen on the given address
-                serverSocket.Bind(ipEndPoint);
-                serverSocket.Listen(4);
-
-                //Accept the incoming clients
-                serverSocket.BeginReceive(byteDataReceive, 0, byteDataReceive.Length, SocketFlags.None, new AsyncCallback(OnReceive), null);
+                while (!done)
+                {
+                    receive_byte_array = listener.Receive(ref groupEP);
+                    Console.WriteLine("Received a broadcast from {0}", groupEP.ToString());
+                    received_data = receive_byte_array[0].ToString();
+                    Console.WriteLine("data follows \n{0}\n\n", received_data);
+                }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                //TODO exception message
+                Console.WriteLine(e.ToString());
             }
+            listener.Close();            
         }
 
-        private void OnReceive(IAsyncResult ar)
+        async Task sendByte(Byte data)
         {
-            try
+            Boolean done = false;
+            Boolean exception_thrown = false;
+
+            Socket sending_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram,
+                            ProtocolType.Udp);
+            IPAddress send_to_address = IPAddress.Parse(this.ip);
+            IPEndPoint sending_end_point = new IPEndPoint(send_to_address, PORT);
+            Console.WriteLine("Enter text to broadcast via UDP.");
+            Console.WriteLine("Enter a blank line to exit the program.");
+            while (!done)
             {
-                Socket clientSocket = (Socket)ar.AsyncState;
-                clientSocket.EndReceive(ar);
+                byte[] send_buffer = new Byte[1];
+                send_buffer[0]=data;
 
-                byte received = byteDataReceive[0];
-
-                bus.WritePort(0x01, received);
-                //TODO write received byte to bus
-
-                serverSocket.BeginReceive(byteDataReceive, 0, byteDataReceive.Length, SocketFlags.None, new AsyncCallback(OnReceive), null);
-            }
-            catch (Exception ex)
-            {
-                //TODO error message
-            }
-        }
-
-        public void OnSend(IAsyncResult ar)
-        {
-            try
-            {
-                clientSocket.EndSend(ar);
-
-            }
-            catch (Exception ex)
-            {
-                //TODO error message
+                try
+                {
+                    sending_socket.SendTo(send_buffer, sending_end_point);
+                }
+                catch (Exception send_exception )
+                {
+                    exception_thrown = true;
+                    Console.WriteLine(" Exception {0}", send_exception.Message);
+                }
+                if (exception_thrown == false)
+                {
+                    Console.WriteLine("Message has been sent to the broadcast address");
+                }
+                else
+                {
+                    exception_thrown = false;
+                    Console.WriteLine("The exception indicates the message was not sent.");
+                }
             }
         }
 
