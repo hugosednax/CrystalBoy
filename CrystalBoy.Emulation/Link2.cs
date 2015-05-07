@@ -10,40 +10,48 @@ namespace CrystalBoy.Emulation
 {
     class Link2
     {
-        UdpClient udpClient = new UdpClient(11000);
+        const string remote_host = "127.0.0.1";
+        const int remote_port = 10001;
+        UdpClient client;
+        System.Threading.Thread receiveThread;
+        byte receivingByte;
+        bool isReceiving = false;
+        Object receiveByteLock;
 
         public Link2()
         {
+            UdpClient client = new UdpClient(remote_host, remote_port);
+            receivingByte = new byte();
+            receiveThread = new System.Threading.Thread(new System.Threading.ThreadStart(receive));
         }
 
-        public void startLinking(string ip, int port) {
-            try
+        private void receive()
+        {
+            IPEndPoint ep = null;
+            byte[] data = client.Receive(ref ep);
+            lock (receiveByteLock)
             {
-                udpClient.Connect(ip, port);
-
-                // Sends a message to the host to which you have connected.
-                Byte[] sendBytes = Encoding.ASCII.GetBytes("Is anybody there?");
-
-                udpClient.Send(sendBytes, sendBytes.Length);
-
-                //IPEndPoint object will allow us to read datagrams sent from any source.
-                IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
-
-                // Blocks until a message returns on this socket from a remote host.
-                Byte[] receiveBytes = udpClient.Receive(ref RemoteIpEndPoint);
-                string returnData = Encoding.ASCII.GetString(receiveBytes);
-
-                // Uses the IPEndPoint object to determine which of these two hosts responded.
-                Console.WriteLine("This is the message you received " +
-                                             returnData.ToString());
-
-                udpClient.Close();
-
+                receivingByte = data[0];
             }
-            catch (Exception e)
+            isReceiving = true;
+        }
+
+        public byte getReceived()
+        {
+            lock (receiveByteLock)
             {
-                Console.WriteLine(e.ToString());
+                return receivingByte;
             }
+        }
+
+        public bool didReceive()
+        {
+            return isReceiving;
+        }
+
+        public void send(byte[] data)
+        {
+            client.SendAsync(data, data.Length);
         }
     }
 }

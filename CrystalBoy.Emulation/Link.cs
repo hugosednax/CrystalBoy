@@ -11,7 +11,8 @@ namespace CrystalBoy.Emulation
 {
     public class Link : MarshalByRefObject
     {
-        private static const int PORT = 10001;
+        /*
+        private const int PORT = 10001;
 
         GameBoyMemoryBus bus;
         string path = @"..\..\..\output\";
@@ -20,6 +21,9 @@ namespace CrystalBoy.Emulation
         Socket serverSocket, clientSocket;
         byte[] byteDataReceive = new byte[1];
         byte[] byteDataSend = new byte[1];
+        Socket sending_socket;
+        IPAddress send_to_address;
+        IPEndPoint sending_end_point;
 
 
         public Link(GameBoyMemoryBus bus)
@@ -27,6 +31,10 @@ namespace CrystalBoy.Emulation
             this.bus = bus;
             fileOpcodeStream = File.Create(path + "link.txt");
             serverSocketActivation();
+            sending_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram,
+                            ProtocolType.Udp);
+            send_to_address = IPAddress.Parse(this.ip);
+            sending_end_point = new IPEndPoint(send_to_address, PORT);
         }
         public Link(GameBoyMemoryBus bus, string ip)
         {
@@ -34,6 +42,10 @@ namespace CrystalBoy.Emulation
             this.ip = ip;
             fileOpcodeStream = File.Create(path + "link.txt");
             serverSocketActivation();
+            sending_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram,
+                            ProtocolType.Udp);
+            send_to_address = IPAddress.Parse(this.ip);
+            sending_end_point = new IPEndPoint(send_to_address, PORT);
         }
 
         public void Send(Byte data)
@@ -43,26 +55,33 @@ namespace CrystalBoy.Emulation
 
         async Task serverSocketActivation()
         {
-            bool done = false;
-            UdpClient listener = new UdpClient(PORT);
-            IPEndPoint groupEP = new IPEndPoint(IPAddress.Any, PORT);
-            string received_data;
-            byte[] receive_byte_array;
-            try
+            IPEndPoint e = new IPEndPoint(IPAddress.Any, PORT);
+            UdpClient u = new UdpClient(e);
+            UdpState s = new UdpState();
+            s.e = end;
+            s.u = u;
+
+            Console.WriteLine("listening for messages");
+            u.BeginReceive(new AsyncCallback(ReceiveCallback), s);
+
+            // Do some work while we wait for a message. For this example, 
+            // we'll just sleep 
+            while (!messageReceived)
             {
-                while (!done)
-                {
-                    receive_byte_array = listener.Receive(ref groupEP);
-                    Console.WriteLine("Received a broadcast from {0}", groupEP.ToString());
-                    received_data = receive_byte_array[0].ToString();
-                    Console.WriteLine("data follows \n{0}\n\n", received_data);
-                }
+                Thread.Sleep(100);
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            listener.Close();            
+        }
+
+        public static void ReceiveCallback(IAsyncResult ar)
+        {
+            UdpClient u = (UdpClient)((UdpState)(ar.AsyncState)).u;
+            IPEndPoint e = (IPEndPoint)((UdpState)(ar.AsyncState)).e;
+
+            Byte[] receiveBytes = u.EndReceive(ar, ref e);
+            string receiveString = Encoding.ASCII.GetString(receiveBytes);
+
+            Console.WriteLine("Received: {0}", receiveString);
+            messageReceived = true;
         }
 
         async Task sendByte(Byte data)
@@ -70,10 +89,7 @@ namespace CrystalBoy.Emulation
             Boolean done = false;
             Boolean exception_thrown = false;
 
-            Socket sending_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram,
-                            ProtocolType.Udp);
-            IPAddress send_to_address = IPAddress.Parse(this.ip);
-            IPEndPoint sending_end_point = new IPEndPoint(send_to_address, PORT);
+            
             Console.WriteLine("Enter text to broadcast via UDP.");
             Console.WriteLine("Enter a blank line to exit the program.");
             while (!done)
@@ -92,6 +108,7 @@ namespace CrystalBoy.Emulation
                 }
                 if (exception_thrown == false)
                 {
+                    done = true;
                     Console.WriteLine("Message has been sent to the broadcast address");
                 }
                 else
@@ -106,5 +123,7 @@ namespace CrystalBoy.Emulation
         {
             return true;
         }
+    }
+         * */
     }
 }

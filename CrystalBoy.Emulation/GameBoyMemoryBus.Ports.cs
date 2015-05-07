@@ -79,7 +79,7 @@ namespace CrystalBoy.Emulation
             fileWriteStream = File.Create(path + "write.txt");
             fileReadStream = File.Create(path + "read.txt");
 
-            this.link = new Link(bus);
+            //this.link = new Link(bus);
             TcpChannel channel = new TcpChannel(8086);
             ChannelServices.RegisterChannel(channel, false);
             RemotingServices.Marshal(link, "L", typeof(Link));

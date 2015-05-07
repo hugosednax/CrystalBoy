@@ -71,17 +71,17 @@ namespace CrystalBoy.Emulation
 			{
 				do
 				{
-                    if (bus.checkLink()) {
-                        //bus.WritePort(0x01, bus.linkByte());
-                        //byte newValue = bus.ReadPort(0x02);
-                        /*newValue &= 0x7F; //7F = 0111 1111
-                        bus.WritePort(0x02, newValue);*/
-                        //bus.RequestedInterrupts |= 0x08;
+                    if (link.didReceive()) {
+                        bus.WritePort(0x01, link.getReceived());
+                        byte newValue = bus.ReadPort(0x02);
+                        newValue &= 0x7F; //7F = 0111 1111
+                        bus.WritePort(0x02, newValue);
+                        bus.RequestedInterrupts |= 0x08;
                         //bus.deactivateLink();
-                        /*string portStrB = "Remote call! \r\n";
+                        string portStrB = "Remote call! \r\n";
                         byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
                         //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                        fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
+                        fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
                     }
 
                     else if ((bus.ReadPort(0x02) & (1 << 7)) != 0) //start transfer flag is true
@@ -91,10 +91,13 @@ namespace CrystalBoy.Emulation
                         //byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
                         //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
                         //fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
-                        /*
+                        
                         byte newValue = bus.ReadPort(0x02);
+                        byte[] data = new byte[1];
+                        data[0] = newValue;
+                        link.send(data);
                         newValue &= 0x7F; //7F = 0111 1111
-                        bus.WritePort(0x02, newValue);*/
+                        bus.WritePort(0x02, newValue);
                     }
 					// Check for pending interrupts
 					if (ime && (temp = bus.EnabledInterrupts & bus.RequestedInterrupts) != 0)
