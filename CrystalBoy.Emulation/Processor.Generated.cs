@@ -71,6 +71,7 @@ namespace CrystalBoy.Emulation
 			{
 				do
 				{
+
                     if (link.didReceive()) {
                         bus.WritePort(0x01, link.getReceived());
                         byte newValue = bus.ReadPort(0x02);

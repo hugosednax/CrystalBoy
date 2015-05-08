@@ -11,7 +11,7 @@ namespace CrystalBoy.Emulation
 {
     class Link2
     {
-        const string remote_host = "127.0.0.1";
+        const string remote_host = "25.102.132.160";
         const int remote_port = 10001;
         UdpClient client;
         System.Threading.Thread receiveThread;
@@ -19,59 +19,60 @@ namespace CrystalBoy.Emulation
         bool isReceiving = false;
         Object receiveByteLock;
         IPEndPoint ipE = null;
+        bool isConnect = false;
 
         public Link2()
         {
-            UdpClient client = new UdpClient(remote_host, remote_port);
-            receivingByte = new byte();
-            receiveThread = new System.Threading.Thread(new System.Threading.ThreadStart(receive));
-            connect();
-        }
-
-        public static IPEndPoint CreateIPEndPoint(string endPoint)
-        {
-            string[] ep = endPoint.Split(':');
-            if (ep.Length != 2) throw new FormatException("Invalid endpoint format");
-            IPAddress ip;
-            if (!IPAddress.TryParse(ep[0], out ip))
+            try
             {
-                throw new FormatException("Invalid ip-adress");
+                client = new UdpClient(remote_host, remote_port);
+                receivingByte = new byte();
+                ipE = new IPEndPoint(IPAddress.Any, 10001);
+                receiveThread = new System.Threading.Thread(new System.Threading.ThreadStart(receive));
+                receiveThread.Start();
+                connect();
+                System.Diagnostics.Debug.Write("Kappa");
             }
-            int port;
-            if (!int.TryParse(ep[1], NumberStyles.None, NumberFormatInfo.CurrentInfo, out port))
+            catch (Exception ex)
             {
-                throw new FormatException("Invalid port");
+                System.Diagnostics.Debug.Write(ex.StackTrace);
             }
-            return new IPEndPoint(ip, port);
         }
 
         public void connect()
         {
+            System.Diagnostics.Debug.Write("Tryng to connect");
             try
             {
-                ipE = CreateIPEndPoint("other guy ip");
-                client.Connect(ipE);
+                client.Connect("25.71.55.98", 10001);
+                isConnect = true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                ipE = null;
+                System.Diagnostics.Debug.Write(ex.StackTrace);
+                isConnect = false;
             }
         }
 
         private void receive()
         {
-            byte[] data = client.Receive(ref ipE);
-            lock (receiveByteLock)
+            System.Diagnostics.Debug.Write("Tryng to receive");
+            if (isConnect != null && client != null)
             {
-                receivingByte = data[0];
+                byte[] data = client.Receive(ref ipE);
+                lock (receiveByteLock)
+                {
+                    receivingByte = data[0];
+                }
+                isReceiving = true;
             }
-            isReceiving = true;
         }
 
         public byte getReceived()
         {
             lock (receiveByteLock)
             {
+                System.Diagnostics.Debug.Write("It's receiving bitcchh");
                 return receivingByte;
             }
         }
@@ -83,10 +84,12 @@ namespace CrystalBoy.Emulation
 
         public void send(byte[] data)
         {
-            if (ipE == null)
+            System.Diagnostics.Debug.Write("Tryng to send");
+            if (isConnect == null || client == null)
                 connect();
-            if (ipE == null)
+            if (isConnect == null || client == null)
                 return;
+            System.Diagnostics.Debug.Write("It's sending bitcchh");
             client.SendAsync(data, data.Length);
         }
     }
