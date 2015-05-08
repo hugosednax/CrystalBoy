@@ -66,6 +66,8 @@ namespace CrystalBoy.Emulation
                 }
                 isReceiving = true;
             }
+            else
+                receive();
         }
 
         public byte getReceived()
@@ -84,12 +86,12 @@ namespace CrystalBoy.Emulation
 
         public void send(byte[] data)
         {
-            System.Diagnostics.Debug.Write("Tryng to send");
+            //System.Diagnostics.Debug.Write("Tryng to send");
             if (isConnect == null || client == null)
                 connect();
             if (isConnect == null || client == null)
                 return;
-            System.Diagnostics.Debug.Write("It's sending bitcchh");
+            //System.Diagnostics.Debug.Write("It's sending bitcchh");
             client.SendAsync(data, data.Length);
         }
     }
