@@ -20,7 +20,7 @@ namespace CrystalBoy.Emulation
 
         public Link2()
         {
-            UdpClient client = new UdpClient(remote_host, remote_port);
+            UdpClient client = new UdpClient(remote_port);
             receivingByte = new byte();
             receiveThread = new System.Threading.Thread(new System.Threading.ThreadStart(receive));
         }

@@ -80,9 +80,9 @@ namespace CrystalBoy.Emulation
             fileReadStream = File.Create(path + "read.txt");
 
             //this.link = new Link(bus);
-            TcpChannel channel = new TcpChannel(8086);
+            /*TcpChannel channel = new TcpChannel(8086);
             ChannelServices.RegisterChannel(channel, false);
-            RemotingServices.Marshal(link, "L", typeof(Link));
+            RemotingServices.Marshal(link, "L", typeof(Link));*/
 
 			this.videoStatusSnapshot = new VideoStatusSnapshot(this);
 			this.videoPortAccessList = new List<PortAccess>(1000);
@@ -100,14 +100,14 @@ namespace CrystalBoy.Emulation
 #endif
 		}
 
-        public void InitializeTransfer()
+        /*public void InitializeTransfer()
         {
             this.transfer = true;
         }
 
         public Link Link() {
             return link;
-        }
+        }*/
 
 		#endregion
 
@@ -228,18 +228,18 @@ namespace CrystalBoy.Emulation
             return linkFlag;
         }
 
-        public void activateLink(byte k) {
+       /* public void activateLink(byte k) {
                 this.toWrite = k;
                 this.linkFlag = true;
-        }
+        }*/
 
-        public void deactivateLink() {
+        /*public void deactivateLink() {
             linkFlag = false;
-        }
+        }*/
 
-        public byte linkByte() {
+       /* public byte linkByte() {
                 return toWrite;
-        }
+        }*/
 
 		public unsafe void WritePort(byte port, byte value)
 		{
