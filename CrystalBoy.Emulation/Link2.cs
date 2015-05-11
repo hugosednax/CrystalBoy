@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Globalization;
+using System.Diagnostics;
+using System.Threading;
 
 namespace CrystalBoy.Emulation
 {
@@ -17,12 +19,14 @@ namespace CrystalBoy.Emulation
         System.Threading.Thread receiveThread;
         byte receivingByte;
         bool isReceiving = false;
-        Object receiveByteLock;
+        Object receiveByteLock = new Object();
         IPEndPoint ipE = null;
         bool isConnect = false;
+        Stopwatch stopWatch = new Stopwatch();
 
         public Link2()
         {
+            stopWatch.Start();
             try
             {
                 client = new UdpClient(remote_port);
@@ -30,7 +34,7 @@ namespace CrystalBoy.Emulation
                 ipE = new IPEndPoint(IPAddress.Any, 10001);
                 receiveThread = new System.Threading.Thread(new System.Threading.ThreadStart(receive));
                 receiveThread.Start();
-                System.Diagnostics.Debug.Write("Kappa");
+                //System.Diagnostics.Debug.Write("Kappa");
             }
             catch (Exception ex)
             {
@@ -40,15 +44,15 @@ namespace CrystalBoy.Emulation
 
         public void connect()
         {
-            System.Diagnostics.Debug.Write("\r\n Tryng to connect");
+            //.Diagnostics.Debug.Write("\r\n Tryng to connect");
             try
             {
-                client.Connect("25.64.78.168", 10001);
+                client.Connect("25.71.55.98", 10001);
                 isConnect = true;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.Write(ex.StackTrace);
+                //System.Diagnostics.Debug.Write(ex.StackTrace);
                 isConnect = false;
             }
         }
@@ -56,12 +60,17 @@ namespace CrystalBoy.Emulation
         private void receive()
         {
             //System.Diagnostics.Debug.Write("Tryng to receive");
+            /*Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            
+            stopWatch.Stop();*/
             while(true){
+                Thread.Sleep(500);
                 if (isConnect != false && client != null)
                 {
                     //System.Diagnostics.Debug.Write("HUUUUM");
                     byte[] data = client.Receive(ref ipE);
-                    System.Diagnostics.Debug.Write("\r\n Received!");
+                    //System.Diagnostics.Debug.Write("\r\n Received!");
                     lock (receiveByteLock)
                     {
                         receivingByte = data[0];
@@ -75,7 +84,7 @@ namespace CrystalBoy.Emulation
         {
             lock (receiveByteLock)
             {
-                System.Diagnostics.Debug.Write("\r\n It's receiving bitcchh");
+                //System.Diagnostics.Debug.Write("\r\n It's receiving bitcchh");
                 return receivingByte;
             }
         }
@@ -87,15 +96,19 @@ namespace CrystalBoy.Emulation
 
         public void send(byte[] data)
         {
-            //System.Diagnostics.Debug.Write("Tryng to send");
-            if (isConnect == false || client == null)
-                connect();
-            if (isConnect == false || client == null)
-                return;
-            //System.Diagnostics.Debug.Write("It's sending bitcchh");
-            //client.SendAsync(data, data.Length);
-            //System.Diagnostics.Debug.Write("\r\n Length: " + data.Length);
-            client.Send(data, data.Length);
+            if (stopWatch.ElapsedMilliseconds > 1000)
+            {
+                //System.Diagnostics.Debug.Write("Tryng to send");
+                if (isConnect == false || client == null)
+                    connect();
+                if (isConnect == false || client == null)
+                    return;
+                //System.Diagnostics.Debug.Write("It's sending bitcchh");
+                //client.SendAsync(data, data.Length);
+                //System.Diagnostics.Debug.Write("\r\n Length: " + data.Length);
+                client.Send(data, data.Length);
+                stopWatch.Restart();
+            }
         }
     }
 }
