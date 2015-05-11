@@ -25,12 +25,11 @@ namespace CrystalBoy.Emulation
         {
             try
             {
-                client = new UdpClient(remote_host, remote_port);
+                client = new UdpClient(remote_port);
                 receivingByte = new byte();
                 ipE = new IPEndPoint(IPAddress.Any, 10001);
                 receiveThread = new System.Threading.Thread(new System.Threading.ThreadStart(receive));
                 receiveThread.Start();
-                connect();
                 System.Diagnostics.Debug.Write("Kappa");
             }
             catch (Exception ex)
@@ -41,10 +40,10 @@ namespace CrystalBoy.Emulation
 
         public void connect()
         {
-            System.Diagnostics.Debug.Write("Tryng to connect");
+            System.Diagnostics.Debug.Write("\r\n Tryng to connect");
             try
             {
-                client.Connect("25.71.55.98", 10001);
+                client.Connect("25.64.78.168", 10001);
                 isConnect = true;
             }
             catch (Exception ex)
@@ -56,25 +55,27 @@ namespace CrystalBoy.Emulation
 
         private void receive()
         {
-            System.Diagnostics.Debug.Write("Tryng to receive");
-            if (isConnect != null && client != null)
-            {
-                byte[] data = client.Receive(ref ipE);
-                lock (receiveByteLock)
+            //System.Diagnostics.Debug.Write("Tryng to receive");
+            while(true){
+                if (isConnect != false && client != null)
                 {
-                    receivingByte = data[0];
+                    //System.Diagnostics.Debug.Write("HUUUUM");
+                    byte[] data = client.Receive(ref ipE);
+                    System.Diagnostics.Debug.Write("\r\n Received!");
+                    lock (receiveByteLock)
+                    {
+                        receivingByte = data[0];
+                    }
+                    isReceiving = true;
                 }
-                isReceiving = true;
             }
-            else
-                receive();
         }
 
         public byte getReceived()
         {
             lock (receiveByteLock)
             {
-                System.Diagnostics.Debug.Write("It's receiving bitcchh");
+                System.Diagnostics.Debug.Write("\r\n It's receiving bitcchh");
                 return receivingByte;
             }
         }
@@ -87,12 +88,14 @@ namespace CrystalBoy.Emulation
         public void send(byte[] data)
         {
             //System.Diagnostics.Debug.Write("Tryng to send");
-            if (isConnect == null || client == null)
+            if (isConnect == false || client == null)
                 connect();
-            if (isConnect == null || client == null)
+            if (isConnect == false || client == null)
                 return;
             //System.Diagnostics.Debug.Write("It's sending bitcchh");
-            client.SendAsync(data, data.Length);
+            //client.SendAsync(data, data.Length);
+            //System.Diagnostics.Debug.Write("\r\n Length: " + data.Length);
+            client.Send(data, data.Length);
         }
     }
 }
