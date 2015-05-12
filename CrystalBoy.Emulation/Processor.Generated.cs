@@ -77,7 +77,7 @@ namespace CrystalBoy.Emulation
                         bus.WritePort(0x01, link.getReceived());
                         byte newValue = bus.ReadPort(0x02);
                         newValue &= 0x7F; //7F = 0111 1111
-                        bus.WritePort(0x02, newValue);
+                        //bus.WritePort(0x02, newValue);
                         bus.RequestedInterrupts |= 0x08;
                         link.setReceived(false);
                         //bus.deactivateLink();
@@ -87,7 +87,7 @@ namespace CrystalBoy.Emulation
                         fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
                     }
 
-                    else if (((bus.ReadPort(0x02) & (1 << 7)) != 0) && wroteToSB) //start transfer flag is true
+                    if (((bus.ReadPort(0x02) & (1 << 7)) != 0) && wroteToSB) //start transfer flag is true
                     {
                         
                         //string portStrA = "SC: " + bus.ReadPort(0x02).ToString() + " \r\n";
@@ -104,6 +104,8 @@ namespace CrystalBoy.Emulation
                         data[0] = newValue;
                         newValue &= 0x7F; //7F = 0111 1111
                         bus.WritePort(0x02, newValue);
+                        //bus.RequestedInterrupts |= 0x08;
+                        wroteToSB = false;
                     }
 					// Check for pending interrupts
 					if (ime && (temp = bus.EnabledInterrupts & bus.RequestedInterrupts) != 0)
