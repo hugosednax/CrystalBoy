@@ -36,6 +36,7 @@ namespace CrystalBoy.Emulation
 	partial class Processor
 	{
         byte toSendData = new byte();
+        bool wroteToSB = false;
         Link2 link = new Link2();
 
 		internal bool Emulate(bool finishFrame)
@@ -78,14 +79,15 @@ namespace CrystalBoy.Emulation
                         newValue &= 0x7F; //7F = 0111 1111
                         bus.WritePort(0x02, newValue);
                         bus.RequestedInterrupts |= 0x08;
+                        link.setReceived(false);
                         //bus.deactivateLink();
-                        string portStrB = "Remote call! \r\n";
+                        /*string portStrB = "Remote call! \r\n";
                         byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
                         //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                        fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);
+                        fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
                     }
 
-                    else if ((bus.ReadPort(0x02) & (1 << 7)) != 0) //start transfer flag is true
+                    else if (((bus.ReadPort(0x02) & (1 << 7)) != 0) && wroteToSB) //start transfer flag is true
                     {
                         
                         //string portStrA = "SC: " + bus.ReadPort(0x02).ToString() + " \r\n";
@@ -94,9 +96,12 @@ namespace CrystalBoy.Emulation
                         //fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
                         
                         byte newValue = bus.ReadPort(0x02);
+                        byte[] dataArray = new byte[1];
+                        dataArray[0] = toSendData;
+                        //System.Diagnostics.Debug.WriteLine("Sending: " + toSendData.ToString());
+                        link.send(dataArray);
                         byte[] data = new byte[1];
                         data[0] = newValue;
-                        link.send(data);
                         newValue &= 0x7F; //7F = 0111 1111
                         bus.WritePort(0x02, newValue);
                     }
@@ -2723,9 +2728,13 @@ namespace CrystalBoy.Emulation
 							break;
 						case 0xE0: /* LD ($FF00+N),A */
 							__temp8 = a;
-                            if (bus[(ushort)(pc - 1)] == 0x01)
+                            if (bus[(ushort)(pc)] == 0x01)
                             {
+                                wroteToSB = true;
+                                //System.Diagnostics.Debug.WriteLine("Writing to SB");
                                 toSendData = __temp8;
+                                pc++;
+                                cycleCount = 12;
                                 /*string portStrA = "Writing to SB: " + __temp8.ToString() + "\r\n";
                                 byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
                                 //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
@@ -2735,15 +2744,6 @@ namespace CrystalBoy.Emulation
                             {
                                 bus.WritePort(bus[pc++], __temp8);
                                 cycleCount = 12;
-                            }
-                            
-                            if (bus[(ushort)(pc - 1)] == 0x02)
-                            {
-                                
-                                /*string portStrA = "Writing to SC: " + __temp8.ToString() + "\r\n";
-                                byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
-                                //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                                fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);*/
                             }
 							break;
 						case 0xE1: /* POP HL */
