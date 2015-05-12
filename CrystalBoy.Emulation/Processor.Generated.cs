@@ -37,6 +37,7 @@ namespace CrystalBoy.Emulation
 	{
         byte toSendData = new byte();
         bool wroteToSB = false;
+        bool ableToSendAgain = true;
         Link2 link = new Link2();
 
 		internal bool Emulate(bool finishFrame)
@@ -73,13 +74,15 @@ namespace CrystalBoy.Emulation
 				do
 				{
 
-                    if (link.didReceive()) {
+                    if (link.didReceive() && link.didSend()) {
                         bus.WritePort(0x01, link.getReceived());
-                        byte newValue = bus.ReadPort(0x02);
+                        /*byte newValue = bus.ReadPort(0x02);
                         newValue &= 0x7F; //7F = 0111 1111
-                        //bus.WritePort(0x02, newValue);
+                        bus.WritePort(0x02, newValue);*/
                         bus.RequestedInterrupts |= 0x08;
                         link.setReceived(false);
+                        link.setSending(false);
+                        ableToSendAgain = true;
                         //bus.deactivateLink();
                         /*string portStrB = "Remote call! \r\n";
                         byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
@@ -87,7 +90,7 @@ namespace CrystalBoy.Emulation
                         fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
                     }
 
-                    if (((bus.ReadPort(0x02) & (1 << 7)) != 0) && wroteToSB) //start transfer flag is true
+                    if (((bus.ReadPort(0x02) & (1 << 7)) != 0) && wroteToSB && ableToSendAgain) //start transfer flag is true
                     {
                         
                         //string portStrA = "SC: " + bus.ReadPort(0x02).ToString() + " \r\n";
@@ -104,8 +107,9 @@ namespace CrystalBoy.Emulation
                         data[0] = newValue;
                         newValue &= 0x7F; //7F = 0111 1111
                         bus.WritePort(0x02, newValue);
+                        ableToSendAgain = false;
                         //bus.RequestedInterrupts |= 0x08;
-                        wroteToSB = false;
+                        //wroteToSB = false;
                     }
 					// Check for pending interrupts
 					if (ime && (temp = bus.EnabledInterrupts & bus.RequestedInterrupts) != 0)

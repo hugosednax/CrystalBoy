@@ -19,6 +19,7 @@ namespace CrystalBoy.Emulation
         System.Threading.Thread receiveThread;
         byte receivingByte;
         bool isReceiving = false;
+        bool isSending = false;
         Object receiveByteLock = new Object();
         IPEndPoint ipE = null;
         bool isConnect = false;
@@ -30,8 +31,8 @@ namespace CrystalBoy.Emulation
             try
             {
                 client = new UdpClient(remote_port);
-                client.Client.SendTimeout = 50;
-                client.Client.ReceiveTimeout = 50;
+                client.Client.SendTimeout = 100;
+                client.Client.ReceiveTimeout = 100;
                 receivingByte = new byte();
                 ipE = new IPEndPoint(IPAddress.Any, 10001);
                 receiveThread = new System.Threading.Thread(new System.Threading.ThreadStart(receive));
@@ -91,7 +92,7 @@ namespace CrystalBoy.Emulation
                     //System.Diagnostics.Debug.Write("\r\n Received!");
                     lock (receiveByteLock)
                     {
-                        receivingByte = data[0];
+                        receivingByte = data[data.Length-1];
                     }
                     isReceiving = true;
                 }
@@ -119,24 +120,36 @@ namespace CrystalBoy.Emulation
             return isReceiving;
         }
 
+        public bool didSend()
+        {
+            return isSending;
+        }
+
+        public void setSending(bool isSending)
+        {
+            this.isSending = isSending;
+        }
+
         public void send(byte[] data)
         {
-            /*if (stopWatch.ElapsedMilliseconds > 300)
+            if (stopWatch.ElapsedMilliseconds > 100)
             {
-                stopWatch.Restart();*/
+                stopWatch.Restart();
                 //System.Diagnostics.Debug.WriteLine("Tryng to send");
                 if (isConnect == false || client == null)
                 {
                     try{
-                    connect();
-                    client.SendAsync(data, data.Length);
+                        connect();
+                        client.SendAsync(data, data.Length);
+                        isSending = true;
                     }
                     catch (Exception e)
                     {
                         System.Diagnostics.Debug.WriteLine(e.StackTrace);
+                        isSending = false;
                     }
                 }
-            //}
+            }
         }
     }
 }
