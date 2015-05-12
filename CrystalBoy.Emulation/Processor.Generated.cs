@@ -38,7 +38,8 @@ namespace CrystalBoy.Emulation
         byte toSendData = new byte();
         bool wroteToSB = false;
         bool ableToSendAgain = true;
-        Link2 link = new Link2();
+        Link3 link = new Link3();
+        Link3Listener listener = new Link3Listener();
 
 		internal bool Emulate(bool finishFrame)
 		{
@@ -74,42 +75,21 @@ namespace CrystalBoy.Emulation
 				do
 				{
 
-                    if (link.didReceive()/* && link.didSend()*/) {
-                        bus.WritePort(0x01, link.getReceived());
-                        /*byte newValue = bus.ReadPort(0x02);
-                        newValue &= 0x7F; //7F = 0111 1111
-                        bus.WritePort(0x02, newValue);*/
+                    if (listener.DidReceive())
+                    {
+                        bus.WritePort(0x01, listener.GetReceived());
                         bus.InterruptRequest(0x08);
-                        link.setReceived(false);
-                        link.setSending(false);
-                        ableToSendAgain = true;
-                        //bus.deactivateLink();
-                        /*string portStrB = "Remote call! \r\n";
-                        byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
-                        //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                        fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
+                        listener.SetDidReceive(false);
                     }
 
                     if (((bus.ReadPort(0x02) & (1 << 7)) != 0)) //start transfer flag is true
                     {
-                        
-                        //string portStrA = "SC: " + bus.ReadPort(0x02).ToString() + " \r\n";
-                        //byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
-                        //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                        //fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);
-                        
-                        byte newValue = bus.ReadPort(0x02);
-                        byte[] dataArray = new byte[1];
-                        dataArray[0] = toSendData;
-                        //System.Diagnostics.Debug.WriteLine("Sending: " + toSendData.ToString());
-                        link.send(dataArray);
+                        link.Send(toSendData);
                         byte[] data = new byte[1];
+                        byte newValue = bus.ReadPort(0x02);
                         data[0] = newValue;
                         newValue &= 0x7F; //7F = 0111 1111
                         bus.WritePort(0x02, newValue);
-                        ableToSendAgain = false;
-                        //bus.RequestedInterrupts |= 0x08;
-                        //wroteToSB = false;
                     }
 					// Check for pending interrupts
 					if (ime && (temp = bus.EnabledInterrupts & bus.RequestedInterrupts) != 0)

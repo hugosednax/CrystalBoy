@@ -79,6 +79,8 @@
     <Compile Include="GameBoyClockManager.cs" />
     <Compile Include="IClockManager.cs" />
     <Compile Include="Link2.cs" />
+    <Compile Include="Link3.cs" />
+    <Compile Include="Link3Listener.cs" />
     <Compile Include="VideoBufferReference.cs" />
     <Compile Include="Mappers\RomController.cs" />
     <Compile Include="Mappers\MemoryBankController.cs" />

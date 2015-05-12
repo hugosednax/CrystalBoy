@@ -50,7 +50,7 @@ namespace CrystalBoy.Emulation
             //.Diagnostics.Debug.Write("\r\n Tryng to connect");
             try
             {
-                client.Connect("25.102.132.160", 10001);
+                client.Connect("25.71.55.98", 10001);
                 isConnect = true;
             }
             catch (Exception ex)
@@ -89,7 +89,7 @@ namespace CrystalBoy.Emulation
                     }
 
                     System.Diagnostics.Debug.WriteLine("Received " + data[0].ToString());
-                    //System.Diagnostics.Debug.Write("\r\n Received!");
+                    System.Diagnostics.Debug.Write("\r\n Received!");
                     lock (receiveByteLock)
                     {
                         receivingByte = data[data.Length-1];
@@ -132,8 +132,8 @@ namespace CrystalBoy.Emulation
 
         public void send(byte[] data)
         {
-            receivingByte = data[0];
-            isReceiving = true;
+            /*receivingByte = data[0];
+            isReceiving = true;*/
             /*if (stopWatch.ElapsedMilliseconds > 100)
             {
                 stopWatch.Restart();*/
@@ -142,14 +142,15 @@ namespace CrystalBoy.Emulation
                 {
                     try{
                         connect();
-                        client.SendAsync(data, data.Length);
-                        isSending = true;
+                        client.Send(data, data.Length);
+                        
                     }
                     catch (Exception e)
                     {
                         System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                        isSending = false;
+                        //isSending = false;
                     }
+                    isSending = true;
                 }
             //}
         }
