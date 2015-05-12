@@ -144,6 +144,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="RomInformationForm.fr-FR.resx">
       <DependentUpon>RomInformationForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="RomInformationForm.resx">
       <DependentUpon>RomInformationForm.cs</DependentUpon>

@@ -74,12 +74,12 @@ namespace CrystalBoy.Emulation
 				do
 				{
 
-                    if (link.didReceive() && link.didSend()) {
+                    if (link.didReceive()/* && link.didSend()*/) {
                         bus.WritePort(0x01, link.getReceived());
                         /*byte newValue = bus.ReadPort(0x02);
                         newValue &= 0x7F; //7F = 0111 1111
                         bus.WritePort(0x02, newValue);*/
-                        bus.RequestedInterrupts |= 0x08;
+                        bus.InterruptRequest(0x08);
                         link.setReceived(false);
                         link.setSending(false);
                         ableToSendAgain = true;
@@ -90,7 +90,7 @@ namespace CrystalBoy.Emulation
                         fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
                     }
 
-                    if (((bus.ReadPort(0x02) & (1 << 7)) != 0) && wroteToSB && ableToSendAgain) //start transfer flag is true
+                    if (((bus.ReadPort(0x02) & (1 << 7)) != 0)) //start transfer flag is true
                     {
                         
                         //string portStrA = "SC: " + bus.ReadPort(0x02).ToString() + " \r\n";

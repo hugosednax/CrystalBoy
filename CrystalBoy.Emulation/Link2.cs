@@ -83,7 +83,7 @@ namespace CrystalBoy.Emulation
                     }
                     catch (SocketException e)
                     {
-                        isConnect = false;
+                        //isConnect = false;
                         System.Diagnostics.Debug.WriteLine(e.StackTrace);
                         continue;
                     }
@@ -132,9 +132,11 @@ namespace CrystalBoy.Emulation
 
         public void send(byte[] data)
         {
-            if (stopWatch.ElapsedMilliseconds > 100)
+            receivingByte = data[0];
+            isReceiving = true;
+            /*if (stopWatch.ElapsedMilliseconds > 100)
             {
-                stopWatch.Restart();
+                stopWatch.Restart();*/
                 //System.Diagnostics.Debug.WriteLine("Tryng to send");
                 if (isConnect == false || client == null)
                 {
@@ -149,7 +151,7 @@ namespace CrystalBoy.Emulation
                         isSending = false;
                     }
                 }
-            }
+            //}
         }
     }
 }
