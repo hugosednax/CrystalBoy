@@ -42,7 +42,7 @@ namespace CrystalBoy.Emulation
         Link3 link = new Link3();
         Link3Listener listener = new Link3Listener();
         int[] numOfCalls = new int[255];
-        long[] timeSpentEach = new long[255];
+        double[] timeSpentEach = new double[255];
 
 		internal bool Emulate(bool finishFrame)
 		{
@@ -74,6 +74,8 @@ namespace CrystalBoy.Emulation
 			cycleCount = 0;
 
             Stopwatch stpw = Stopwatch.StartNew();
+            long stpwFrequency = Stopwatch.Frequency;
+            
             stpw.Reset();
 			try
 			{
@@ -152,18 +154,27 @@ namespace CrystalBoy.Emulation
                     }
 
                     numOfCalls[opcode]++;
-                    if (bus.benchmark){
+
+                    if (bus.benchmark)
+                    {
                         using (FileStream fs = File.Create(@"..\..\..\output\scores.txt"))
                         {
                             StreamWriter sw = new StreamWriter(fs);
-                            for (int i = 0; i < numOfCalls.Length; i++) {
-                                sw.WriteLine("OpCode: "+i +" is called "+numOfCalls[i]+" times and took "+ timeSpentEach[i]+" ticks");
+                            sw.WriteLine(stpwFrequency);
+                            for (int i = 0; i < numOfCalls.Length; i++)
+                            {
+                                if (timeSpentEach[i]>0)
+                                    sw.WriteLine("OpCode: " + i + " is called " + numOfCalls[i] + " times and took " + timeSpentEach[i] + " ns and spents in average: " + numOfCalls[i] / timeSpentEach[i] + " ns per call");
+                                else
+                                    sw.WriteLine("OpCode: " + i + " is called " + numOfCalls[i] + " times and took " + timeSpentEach[i] + " ns");
                             }
+                            sw.Flush();
+                            sw.Close();
                             Console.WriteLine("Finished writing");
                         }
-
                         bus.benchmark = false;
                     }
+
                     stpw.Start();
                     byte copyOpcode = opcode;
 					switch (opcode)
@@ -2907,7 +2918,7 @@ namespace CrystalBoy.Emulation
 							pc--; // Revert changes to PC
 							return true;
 					}
-                    timeSpentEach[copyOpcode] += stpw.ElapsedTicks;
+                    timeSpentEach[copyOpcode] += ((double)stpw.ElapsedTicks / (double)stpwFrequency) * 1000000000;
                     stpw.Reset();
 					if (enableInterruptDelay != 0 && --enableInterruptDelay == 0) ime = true;
 					
