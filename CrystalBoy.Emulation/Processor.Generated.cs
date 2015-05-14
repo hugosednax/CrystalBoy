@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
+using System.Linq;
 
 namespace CrystalBoy.Emulation
 {
@@ -41,8 +42,9 @@ namespace CrystalBoy.Emulation
         bool ableToSendAgain = true;
         Link3 link = new Link3();
         Link3Listener listener = new Link3Listener();
-        int[] numOfCalls = new int[255];
-        double[] timeSpentEach = new double[255];
+        int[] numOfCalls = new int[256];
+        double[] timeSpentEach = new double[256];
+        Dictionary<int, int> ordered = new Dictionary<int, int>();
 
 		internal bool Emulate(bool finishFrame)
 		{
@@ -73,10 +75,11 @@ namespace CrystalBoy.Emulation
 			// Initialize the count at 0 to please the compiler :(
 			cycleCount = 0;
 
+            //benchMark Stuff
             Stopwatch stpw = Stopwatch.StartNew();
             long stpwFrequency = Stopwatch.Frequency;
-            
-            stpw.Reset();
+
+                stpw.Reset();
 			try
 			{
 				do
@@ -154,19 +157,42 @@ namespace CrystalBoy.Emulation
                     }
 
                     numOfCalls[opcode]++;
+                    if(ordered.ContainsKey(opcode))
+                        ordered[opcode]++;
+                    else
+                        ordered.Add(opcode,0);
 
                     if (bus.benchmark)
                     {
                         using (FileStream fs = File.Create(@"..\..\..\output\scores.txt"))
                         {
                             StreamWriter sw = new StreamWriter(fs);
-                            sw.WriteLine(stpwFrequency);
                             for (int i = 0; i < numOfCalls.Length; i++)
                             {
                                 if (timeSpentEach[i]>0)
                                     sw.WriteLine("OpCode: " + i + " is called " + numOfCalls[i] + " times and took " + timeSpentEach[i] + " ns and spents in average: " + numOfCalls[i] / timeSpentEach[i] + " ns per call");
                                 else
                                     sw.WriteLine("OpCode: " + i + " is called " + numOfCalls[i] + " times and took " + timeSpentEach[i] + " ns");
+                            }
+                            sw.Flush();
+                            sw.Close();
+                            Console.WriteLine("Finished writing");
+                        }
+
+                        using (FileStream fs = File.Create(@"..\..\..\output\scoresOrdered.txt"))
+                        {
+                            StreamWriter sw = new StreamWriter(fs);
+                            var items = from pair in ordered
+                                        orderby pair.Value descending
+                                        select pair;
+
+                            // Display results.
+                            foreach (KeyValuePair<int, int> pair in items)
+                            {
+                                if (timeSpentEach[pair.Key] > 0)
+                                    sw.WriteLine("OpCode: " + pair.Key + " is called " + numOfCalls[pair.Key] + " times and took " + timeSpentEach[pair.Key] + " ns and spents in average: " + numOfCalls[pair.Key] / timeSpentEach[pair.Key] + " ns per call");
+                                else
+                                    sw.WriteLine("OpCode: " + pair.Key + " is called " + numOfCalls[pair.Key] + " times and took " + timeSpentEach[pair.Key] + " ns");
                             }
                             sw.Flush();
                             sw.Close();
