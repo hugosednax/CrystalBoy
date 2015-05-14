@@ -61,6 +61,7 @@ namespace CrystalBoy.Emulation
         FileStream fileReadStream;
 
         public bool startSaving = false;
+        public bool benchmark = false;
 
         //public delegate void RemoteAsyncDelegate(byte b);
         Link link;

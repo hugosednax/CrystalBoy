@@ -312,6 +312,10 @@ namespace CrystalBoy.Emulator
                 bus.turnOnWrite();
             if (IsKeyDown(Keys.K))
                 bus.turnOffWrite();
+            if (IsKeyDown(Keys.B))
+                bus.benchmark = true;
+            if (IsKeyDown(Keys.N))
+                bus.benchmark = false;
 			if (IsKeyDown(Keys.RShiftKey))
 				keys |= GameBoyKeys.Select;
 			if (IsKeyDown(Keys.Return))

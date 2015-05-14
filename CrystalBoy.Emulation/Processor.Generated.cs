@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Diagnostics;
 
 namespace CrystalBoy.Emulation
 {
@@ -40,6 +41,8 @@ namespace CrystalBoy.Emulation
         bool ableToSendAgain = true;
         Link3 link = new Link3();
         Link3Listener listener = new Link3Listener();
+        int[] numOfCalls = new int[255];
+        long[] timeSpentEach = new long[255];
 
 		internal bool Emulate(bool finishFrame)
 		{
@@ -70,6 +73,8 @@ namespace CrystalBoy.Emulation
 			// Initialize the count at 0 to please the compiler :(
 			cycleCount = 0;
 
+            Stopwatch stpw = Stopwatch.StartNew();
+            stpw.Reset();
 			try
 			{
 				do
@@ -146,6 +151,21 @@ namespace CrystalBoy.Emulation
                         }
                     }
 
+                    numOfCalls[opcode]++;
+                    if (bus.benchmark){
+                        using (FileStream fs = File.Create(@"..\..\..\output\scores.txt"))
+                        {
+                            StreamWriter sw = new StreamWriter(fs);
+                            for (int i = 0; i < numOfCalls.Length; i++) {
+                                sw.WriteLine("OpCode: "+i +" is called "+numOfCalls[i]+" times and took "+ timeSpentEach[i]+" ticks");
+                            }
+                            Console.WriteLine("Finished writing");
+                        }
+
+                        bus.benchmark = false;
+                    }
+                    stpw.Start();
+                    byte copyOpcode = opcode;
 					switch (opcode)
 					{
 						case 0x00: /* NOP */
@@ -2887,7 +2907,8 @@ namespace CrystalBoy.Emulation
 							pc--; // Revert changes to PC
 							return true;
 					}
-
+                    timeSpentEach[copyOpcode] += stpw.ElapsedTicks;
+                    stpw.Reset();
 					if (enableInterruptDelay != 0 && --enableInterruptDelay == 0) ime = true;
 					
 				HandleBreakpoints:
