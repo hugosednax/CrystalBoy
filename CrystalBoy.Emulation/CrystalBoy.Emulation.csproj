@@ -75,10 +75,8 @@
     <Compile Include="AudioSampleGenerator.cs" />
     <Compile Include="AudioStatusSnapshot.cs" />
     <Compile Include="BorderVisibility.cs" />
-    <Compile Include="Link.cs" />
     <Compile Include="GameBoyClockManager.cs" />
     <Compile Include="IClockManager.cs" />
-    <Compile Include="Link2.cs" />
     <Compile Include="Link3.cs" />
     <Compile Include="Link3Listener.cs" />
     <Compile Include="VideoBufferReference.cs" />

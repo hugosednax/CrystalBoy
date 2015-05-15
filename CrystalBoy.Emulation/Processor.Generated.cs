@@ -40,8 +40,12 @@ namespace CrystalBoy.Emulation
         byte toSendData = new byte();
         bool wroteToSB = false;
         bool ableToSendAgain = true;
+
+        //AVExe link sockets for connection
         Link3 link = new Link3();
         Link3Listener listener = new Link3Listener();
+
+        //AVExe benchmark variables
         int[] numOfCalls = new int[256];
         double[] timeSpentEach = new double[256];
         Dictionary<int, int> ordered = new Dictionary<int, int>();
@@ -75,16 +79,17 @@ namespace CrystalBoy.Emulation
 			// Initialize the count at 0 to please the compiler :(
 			cycleCount = 0;
 
-            //benchMark Stuff
+            //AVExe timer for benchmark 
             Stopwatch stpw = Stopwatch.StartNew();
             long stpwFrequency = Stopwatch.Frequency;
+            stpw.Reset();
 
-                stpw.Reset();
 			try
 			{
 				do
 				{
 
+                    //AVExe save information received
                     if (listener.DidReceive())
                     {
                         bus.WritePort(0x01, listener.GetReceived());
@@ -92,7 +97,7 @@ namespace CrystalBoy.Emulation
                         listener.SetDidReceive(false);
                     }
 
-                    if (((bus.ReadPort(0x02) & (1 << 7)) != 0)) //start transfer flag is true
+                    if (((bus.ReadPort(0x02) & (1 << 7)) != 0)) //AVExe start transfer if flag is true
                     {
                         link.Send(toSendData);
                         byte[] data = new byte[1];
@@ -144,24 +149,15 @@ namespace CrystalBoy.Emulation
 					if (!skipPcIncrement) pc++;
 					else skipPcIncrement = false;
 
-                    if (bus.startSaving)
-                    {
-                        if(opcode == 0xE0){ /* LD ($FF00+N),A  perciso de descobrir o N ...($FF00+N) no entanto é bus[pc++] e nao sei como */
-                            byte[] bytes = new byte[1];
-                            bytes[0] = opcode;    
-                            /*string portStr = "0x" + BitConverter.ToString(bytes) + "\r\n";
-                            byte[] bytesInStream = GameBoyMemoryBus.GetBytes(portStr);
-                            //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                            fileOpcodeStream.Write(bytesInStream, 0, bytesInStream.Length);*/
-                        }
-                    }
 
+                    //AVExe count opcode calls
                     numOfCalls[opcode]++;
                     if(ordered.ContainsKey(opcode))
                         ordered[opcode]++;
                     else
                         ordered.Add(opcode,0);
 
+                    //AVExe print benchmark information
                     if (bus.benchmark)
                     {
                         using (FileStream fs = File.Create(@"..\..\..\output\scores.txt"))
@@ -170,9 +166,9 @@ namespace CrystalBoy.Emulation
                             for (int i = 0; i < numOfCalls.Length; i++)
                             {
                                 if (timeSpentEach[i]>0)
-                                    sw.WriteLine("OpCode: " + i + " is called " + numOfCalls[i] + " times and took " + timeSpentEach[i] + " ns and spents in average: " + numOfCalls[i] / timeSpentEach[i] + " ns per call");
+                                    sw.WriteLine("OpCode: " + i.ToString("X") + " is called " + numOfCalls[i] + " times and took " + timeSpentEach[i] + " ns and spents in average: " + numOfCalls[i] / timeSpentEach[i] + " ns per call");
                                 else
-                                    sw.WriteLine("OpCode: " + i + " is called " + numOfCalls[i] + " times and took " + timeSpentEach[i] + " ns");
+                                    sw.WriteLine("OpCode: " + i.ToString("X") + " is called " + numOfCalls[i] + " times and took " + timeSpentEach[i] + " ns");
                             }
                             sw.Flush();
                             sw.Close();
@@ -190,9 +186,9 @@ namespace CrystalBoy.Emulation
                             foreach (KeyValuePair<int, int> pair in items)
                             {
                                 if (timeSpentEach[pair.Key] > 0)
-                                    sw.WriteLine("OpCode: " + pair.Key + " is called " + numOfCalls[pair.Key] + " times and took " + timeSpentEach[pair.Key] + " ns and spents in average: " + numOfCalls[pair.Key] / timeSpentEach[pair.Key] + " ns per call");
+                                    sw.WriteLine("OpCode: " + pair.Key.ToString("X") + " is called " + numOfCalls[pair.Key] + " times and took " + timeSpentEach[pair.Key] + " ns and spents in average: " + numOfCalls[pair.Key] / timeSpentEach[pair.Key] + " ns per call");
                                 else
-                                    sw.WriteLine("OpCode: " + pair.Key + " is called " + numOfCalls[pair.Key] + " times and took " + timeSpentEach[pair.Key] + " ns");
+                                    sw.WriteLine("OpCode: " + pair.Key.ToString("X") + " is called " + numOfCalls[pair.Key] + " times and took " + timeSpentEach[pair.Key] + " ns");
                             }
                             sw.Flush();
                             sw.Close();
@@ -201,6 +197,7 @@ namespace CrystalBoy.Emulation
                         bus.benchmark = false;
                     }
 
+                    //AVExe start timer
                     stpw.Start();
                     byte copyOpcode = opcode;
 					switch (opcode)
@@ -2771,17 +2768,13 @@ namespace CrystalBoy.Emulation
 							break;
 						case 0xE0: /* LD ($FF00+N),A */
 							__temp8 = a;
-                            if (bus[(ushort)(pc)] == 0x01)
+                            if (bus[(ushort)(pc)] == 0x01) //AVExe em vez de guardar em SB, guarda numa variavel nossa
                             {
                                 wroteToSB = true;
                                 //System.Diagnostics.Debug.WriteLine("Writing to SB");
                                 toSendData = __temp8;
                                 pc++;
                                 cycleCount = 12;
-                                /*string portStrA = "Writing to SB: " + __temp8.ToString() + "\r\n";
-                                byte[] bytesInStreamA = GameBoyMemoryBus.GetBytes(portStrA);
-                                //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                                fileOpcodeStream.Write(bytesInStreamA, 0, bytesInStreamA.Length);*/
                             }
                             else
                             {
@@ -2852,13 +2845,6 @@ namespace CrystalBoy.Emulation
 							__temp8 = bus.ReadPort(bus[pc++]);
 							a = __temp8;
 							cycleCount = 12;
-                            if (0x02 == bus[(ushort)(pc - 1)] || 0x01 == bus[(ushort)(pc - 1)])
-                            {
-                                /*string portStrB = "Reading " + bus[(ushort)(pc - 1)].ToString() + ".\r\n";
-                                byte[] bytesInStreamB = GameBoyMemoryBus.GetBytes(portStrB);
-                                //fileOpcodeStream.Read(bytesInStream, 0, bytesInStream.Length);
-                                fileOpcodeStream.Write(bytesInStreamB, 0, bytesInStreamB.Length);*/
-                           }
 							break;
 						case 0xF1: /* POP AF */
 							__temp16 = (ushort)(bus[sp++] | (bus[sp++] << 8));
@@ -2944,8 +2930,11 @@ namespace CrystalBoy.Emulation
 							pc--; // Revert changes to PC
 							return true;
 					}
+                    //AVExe save time and reset
                     timeSpentEach[copyOpcode] += ((double)stpw.ElapsedTicks / (double)stpwFrequency) * 1000000000;
                     stpw.Reset();
+
+
 					if (enableInterruptDelay != 0 && --enableInterruptDelay == 0) ime = true;
 					
 				HandleBreakpoints:

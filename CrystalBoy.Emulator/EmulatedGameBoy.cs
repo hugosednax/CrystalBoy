@@ -305,17 +305,9 @@ namespace CrystalBoy.Emulator
 			if (IsKeyDown(Keys.X))
 				keys |= GameBoyKeys.A;
 			if (IsKeyDown(Keys.Z))
-				keys |= GameBoyKeys.B;
-            if (IsKeyDown(Keys.O))
-                bus.RequestedInterrupts |= 0x08;
-            if (IsKeyDown(Keys.J))
-                bus.turnOnWrite();
-            if (IsKeyDown(Keys.K))
-                bus.turnOffWrite();
+                keys |= GameBoyKeys.B; //AVExe trigger writing benchmark data on file
             if (IsKeyDown(Keys.B))
                 bus.benchmark = true;
-            if (IsKeyDown(Keys.N))
-                bus.benchmark = false;
 			if (IsKeyDown(Keys.RShiftKey))
 				keys |= GameBoyKeys.Select;
 			if (IsKeyDown(Keys.Return))
